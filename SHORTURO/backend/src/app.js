@@ -4,6 +4,7 @@ const helmet = require("helmet");
 const morgan = require("morgan");
 const { env } = require("./config/env");
 const { notFound, errorHandler } = require("./middleware/errors");
+const authRoutes = require("./routes/auth");
 
 function createApp() {
   const app = express();
@@ -24,6 +25,9 @@ function createApp() {
     res.json({ ok: true, env: env.nodeEnv });
   });
 
+  // Auth
+  app.use("/api/auth", authRoutes);
+
   app.use(notFound);
   app.use(errorHandler);
 
@@ -31,4 +35,3 @@ function createApp() {
 }
 
 module.exports = { createApp };
-

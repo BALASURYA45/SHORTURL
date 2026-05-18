@@ -16,3 +16,8 @@ Step-by-step full-stack URL Shortener (React + Node/Express + DB) with authentic
 ## Database module (done)
 - Mongo connection: `backend/src/db.js`
 - Models: `backend/src/models/User.js`, `backend/src/models/Link.js`, `backend/src/models/Visit.js`
+
+## Auth module (done)
+- Routes: `backend/src/routes/auth.js` (`POST /api/auth/signup`, `POST /api/auth/login`)
+- JWT guard: `backend/src/middleware/auth.js`
+- Validation: `backend/src/validation/schemas.js`

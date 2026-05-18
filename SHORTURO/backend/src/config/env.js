@@ -33,6 +33,7 @@ const env = {
 function assertValidEnv() {
   if (!Number.isFinite(env.port) || env.port <= 0) throw new Error("PORT must be a valid number");
   requireEnv("MONGODB_URI");
+  requireEnv("JWT_SECRET");
 }
 
 module.exports = { env, requireEnv, assertValidEnv };
