@@ -25,16 +25,14 @@ const env = {
   frontendOrigin: readEnv("FRONTEND_ORIGIN", "http://localhost:5173"),
   baseUrl: normalizeBaseUrl(readEnv("BASE_URL", "http://localhost:4000")),
 
-  // required later by other modules (auth/db)
+  // required later 
   jwtSecret: readEnv("JWT_SECRET", null),
   mongoUri: readEnv("MONGODB_URI", null)
 };
 
 function assertValidEnv() {
   if (!Number.isFinite(env.port) || env.port <= 0) throw new Error("PORT must be a valid number");
-  // Keep these optional for now (we’re building config module first),
-  // but provide a clear error when modules start requiring them.
+  requireEnv("MONGODB_URI");
 }
 
 module.exports = { env, requireEnv, assertValidEnv };
-
