@@ -45,6 +45,46 @@ a:hover {
   padding: 32px 16px;
 }
 
+.shell {
+  min-height: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(0, 0, 0, 0.12);
+  backdrop-filter: blur(10px);
+}
+
+.brand {
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.content {
+  padding: 28px 16px;
+  display: grid;
+  place-items: start center;
+}
+
+.buttonSmall {
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.buttonSmall:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
 .card {
   width: min(440px, 100%);
   padding: 22px;
@@ -125,4 +165,3 @@ a:hover {
   color: rgba(255, 255, 255, 0.92);
   font-size: 13px;
 }
-

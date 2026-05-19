@@ -1,4 +1,4 @@
-import { getToken } from "./auth.js";
+import { getToken, setToken } from "./auth.js";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";
 
@@ -26,6 +26,7 @@ export async function apiFetch(path, { method = "GET", body, token, headers } = 
   const data = isJson ? await res.json().catch(() => null) : null;
 
   if (!res.ok) {
+    if (res.status === 401) setToken(null);
     const message = data?.error || `Request failed (${res.status})`;
     throw new ApiError(message, { status: res.status });
   }
@@ -40,4 +41,3 @@ export function signup({ email, password }) {
 export function login({ email, password }) {
   return apiFetch("/api/auth/login", { method: "POST", body: { email, password } });
 }
-

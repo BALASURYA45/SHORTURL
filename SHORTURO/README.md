@@ -37,3 +37,7 @@ Step-by-step full-stack URL Shortener (React + Node/Express + DB) with authentic
 - React app: `frontend/` (Vite)
 - Pages: `frontend/src/pages/Login.jsx`, `frontend/src/pages/Signup.jsx`
 - API helper: `frontend/src/lib/api.js` (calls backend auth endpoints)
+
+## Frontend: Routing (done)
+- Protected route guard: `frontend/src/components/RequireAuth.jsx`
+- Dashboard route: `frontend/src/pages/Dashboard.jsx`
