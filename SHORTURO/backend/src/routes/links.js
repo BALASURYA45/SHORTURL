@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const Link = require("../models/Link");
 const Visit = require("../models/Visit");
 const { env } = require("../config/env");
-const { createLinkSchema, updateLinkSchema } = require("../validation/schemas");
+const { createLinkSchema, updateLinkSchema, bulkCreateLinksSchema } = require("../validation/schemas");
 const qrcode = require("qrcode");
 
 const router = express.Router();
@@ -18,12 +18,49 @@ function normalizeSlug(input) {
   return String(input).trim().toLowerCase();
 }
 
+function parseExpiresAt(expiresAt) {
+  if (expiresAt === undefined) return undefined;
+  if (expiresAt === null) return null;
+  const dt = new Date(expiresAt);
+  if (Number.isNaN(dt.getTime())) return "invalid";
+  return dt;
+}
+
 function randomSlug(length = 7) {
   const alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   const bytes = crypto.randomBytes(length);
   let out = "";
   for (let i = 0; i < length; i += 1) out += alphabet[bytes[i] % alphabet.length];
   return out;
+}
+
+async function createLinkWithUniqueSlug({ userId, originalUrl, customSlug, expiresAt }) {
+  const expiresAtValue = parseExpiresAt(expiresAt);
+  if (expiresAtValue === "invalid") {
+    const err = new Error("Invalid expiresAt");
+    err.statusCode = 400;
+    throw err;
+  }
+
+  const desiredSlug = normalizeSlug(customSlug);
+  if (desiredSlug) {
+    return Link.create({ userId, originalUrl, slug: desiredSlug, expiresAt: expiresAtValue ?? null });
+  }
+
+  for (let attempt = 0; attempt < 6; attempt += 1) {
+    try {
+      const slug = randomSlug(7);
+      // eslint-disable-next-line no-await-in-loop
+      return await Link.create({ userId, originalUrl, slug, expiresAt: expiresAtValue ?? null });
+    } catch (err) {
+      if (isDuplicateKeyError(err)) continue;
+      throw err;
+    }
+  }
+
+  const err = new Error("Could not generate a unique short code. Try again.");
+  err.statusCode = 503;
+  throw err;
 }
 
 function toLinkResponse(link) {
@@ -55,30 +92,49 @@ router.post("/", async (req, res, next) => {
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
-    const expiresAtValue = expiresAt === null ? null : expiresAt ? new Date(expiresAt) : null;
-    if (expiresAtValue && Number.isNaN(expiresAtValue.getTime())) return res.status(400).json({ error: "Invalid expiresAt" });
-
-    const desiredSlug = normalizeSlug(customSlug);
-    if (desiredSlug) {
-      const link = await Link.create({ userId, originalUrl, slug: desiredSlug, expiresAt: expiresAtValue });
-      return res.status(201).json({ link: toLinkResponse(link) });
-    }
-
-    for (let attempt = 0; attempt < 6; attempt += 1) {
-      try {
-        const slug = randomSlug(7);
-        const link = await Link.create({ userId, originalUrl, slug, expiresAt: expiresAtValue });
-        return res.status(201).json({ link: toLinkResponse(link) });
-      } catch (err) {
-        if (isDuplicateKeyError(err)) continue;
-        throw err;
-      }
-    }
-
-    return res.status(503).json({ error: "Could not generate a unique short code. Try again." });
+    const link = await createLinkWithUniqueSlug({ userId, originalUrl, customSlug, expiresAt });
+    return res.status(201).json({ link: toLinkResponse(link) });
   } catch (err) {
     if (err?.name === "ZodError") return res.status(400).json({ error: err.errors?.[0]?.message || "Invalid input" });
     if (isDuplicateKeyError(err)) return res.status(409).json({ error: "Alias already in use" });
+    return next(err);
+  }
+});
+
+// POST /api/links/bulk
+router.post("/bulk", async (req, res, next) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const { items } = bulkCreateLinksSchema.parse(req.body);
+
+    const results = [];
+    for (let i = 0; i < items.length; i += 1) {
+      const it = items[i];
+      try {
+        // eslint-disable-next-line no-await-in-loop
+        const link = await createLinkWithUniqueSlug({
+          userId,
+          originalUrl: it.originalUrl,
+          customSlug: it.customSlug,
+          expiresAt: it.expiresAt
+        });
+        results.push({ index: i, ok: true, link: toLinkResponse(link) });
+      } catch (err) {
+        const message =
+          err?.statusCode === 400
+            ? err.message
+            : isDuplicateKeyError(err)
+              ? "Alias already in use"
+              : "Failed to create link";
+        results.push({ index: i, ok: false, error: message });
+      }
+    }
+
+    return res.status(207).json({ results });
+  } catch (err) {
+    if (err?.name === "ZodError") return res.status(400).json({ error: err.errors?.[0]?.message || "Invalid input" });
     return next(err);
   }
 });

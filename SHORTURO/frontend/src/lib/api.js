@@ -116,3 +116,7 @@ export function getPublicStats(slug, { days = 30 } = {}) {
     token: null
   });
 }
+
+export function bulkCreateLinks(items) {
+  return apiFetch("/api/links/bulk", { method: "POST", body: { items } });
+}

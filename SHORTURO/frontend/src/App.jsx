@@ -6,6 +6,7 @@ import DashboardPage from "./pages/Dashboard.jsx";
 import LinkAnalyticsPage from "./pages/LinkAnalytics.jsx";
 import ScanPage from "./pages/Scan.jsx";
 import PublicStatsPage from "./pages/PublicStats.jsx";
+import BulkPage from "./pages/Bulk.jsx";
 import { getToken } from "./lib/auth.js";
 import RequireAuth from "./components/RequireAuth.jsx";
 
@@ -31,6 +32,14 @@ export default function App() {
       <Route path="/signup" element={<SignupPage />} />
       <Route path="/scan" element={<ScanPage />} />
       <Route path="/stats/:slug" element={<PublicStatsPage />} />
+      <Route
+        path="/dashboard/bulk"
+        element={
+          <RequireAuth>
+            <BulkPage />
+          </RequireAuth>
+        }
+      />
       <Route
         path="/dashboard"
         element={

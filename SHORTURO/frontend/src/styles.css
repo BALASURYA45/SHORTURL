@@ -319,6 +319,27 @@ a:hover {
   overflow-wrap: anywhere;
 }
 
+.textarea {
+  width: 100%;
+  margin-top: 8px;
+  padding: 12px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(5, 8, 20, 0.4);
+  color: var(--text);
+  outline: none;
+  resize: vertical;
+  min-height: 180px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.textarea:focus {
+  border-color: rgba(66, 210, 255, 0.55);
+  box-shadow: 0 0 0 4px rgba(66, 210, 255, 0.12);
+}
+
 .buttonSmallActive {
   border-color: rgba(66, 210, 255, 0.55);
   box-shadow: 0 0 0 4px rgba(66, 210, 255, 0.10);

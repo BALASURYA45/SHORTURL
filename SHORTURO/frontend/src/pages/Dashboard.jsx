@@ -237,6 +237,9 @@ export default function DashboardPage() {
           <Link className="buttonSmall" to="/scan">
             Scan QR
           </Link>
+          <Link className="buttonSmall" to="/dashboard/bulk">
+            Bulk CSV
+          </Link>
           <button className="buttonSmall" type="button" onClick={onLogout}>
             Logout
           </button>

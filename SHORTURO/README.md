@@ -68,3 +68,7 @@ Step-by-step full-stack URL Shortener (React + Node/Express + DB) with authentic
 ## Public stats (done)
 - API: `backend/src/routes/public.js` (`GET /api/public/:slug?days=30`)
 - UI: `frontend/src/pages/PublicStats.jsx` (`/stats/:slug`)
+
+## Bulk shorten (done)
+- API: `backend/src/routes/links.js` (`POST /api/links/bulk`)
+- UI: `frontend/src/pages/Bulk.jsx` (`/dashboard/bulk`)

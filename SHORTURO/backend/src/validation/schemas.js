@@ -36,4 +36,17 @@ const updateLinkSchema = z
   })
   .refine((v) => Object.keys(v).length > 0, { message: "At least one field is required" });
 
-module.exports = { signupSchema, loginSchema, createLinkSchema, updateLinkSchema };
+const bulkCreateLinksSchema = z.object({
+  items: z
+    .array(
+      z.object({
+        originalUrl: z.string().url().max(2048),
+        customSlug: slugSchema.optional(),
+        expiresAt: z.union([z.string().datetime(), z.null()]).optional()
+      })
+    )
+    .min(1)
+    .max(200)
+});
+
+module.exports = { signupSchema, loginSchema, createLinkSchema, updateLinkSchema, bulkCreateLinksSchema };
