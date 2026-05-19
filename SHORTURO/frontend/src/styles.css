@@ -85,6 +85,118 @@ a:hover {
   background: rgba(255, 255, 255, 0.12);
 }
 
+.buttonDanger {
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 92, 122, 0.35);
+  background: rgba(255, 92, 122, 0.12);
+  color: rgba(255, 255, 255, 0.92);
+  cursor: pointer;
+}
+
+.buttonDanger:hover {
+  background: rgba(255, 92, 122, 0.18);
+}
+
+.stack {
+  width: min(940px, 100%);
+  display: grid;
+  gap: 16px;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 18px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.formGrid {
+  margin-top: 12px;
+}
+
+.table {
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.tableRow {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 14px;
+  padding: 12px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 14px;
+}
+
+.cellTitle {
+  font-weight: 750;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cellSub {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.cellMeta {
+  text-align: right;
+  min-width: 160px;
+}
+
+.cellActions {
+  display: flex;
+  gap: 8px;
+  align-items: start;
+}
+
+.chip {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(0, 0, 0, 0.12);
+  font-size: 12px;
+}
+
+.toast {
+  position: fixed;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(10px);
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 13px;
+}
+
+@media (max-width: 760px) {
+  .tableRow {
+    grid-template-columns: 1fr;
+  }
+  .cellMeta {
+    text-align: left;
+    min-width: 0;
+  }
+}
+
 .card {
   width: min(440px, 100%);
   padding: 22px;

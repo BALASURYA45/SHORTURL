@@ -41,3 +41,6 @@ Step-by-step full-stack URL Shortener (React + Node/Express + DB) with authentic
 ## Frontend: Routing (done)
 - Protected route guard: `frontend/src/components/RequireAuth.jsx`
 - Dashboard route: `frontend/src/pages/Dashboard.jsx`
+
+## Frontend: Dashboard (done)
+- Links CRUD UI: `frontend/src/pages/Dashboard.jsx` (create/list/delete + copy)

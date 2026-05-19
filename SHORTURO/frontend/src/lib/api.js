@@ -41,3 +41,15 @@ export function signup({ email, password }) {
 export function login({ email, password }) {
   return apiFetch("/api/auth/login", { method: "POST", body: { email, password } });
 }
+
+export function createLink({ originalUrl, customSlug }) {
+  return apiFetch("/api/links", { method: "POST", body: { originalUrl, customSlug } });
+}
+
+export function listLinks() {
+  return apiFetch("/api/links", { method: "GET" });
+}
+
+export function deleteLink(id) {
+  return apiFetch(`/api/links/${id}`, { method: "DELETE" });
+}
