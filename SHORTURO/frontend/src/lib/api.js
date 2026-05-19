@@ -53,3 +53,7 @@ export function listLinks() {
 export function deleteLink(id) {
   return apiFetch(`/api/links/${id}`, { method: "DELETE" });
 }
+
+export function getLinkAnalytics(id) {
+  return apiFetch(`/api/links/${id}/analytics`, { method: "GET" });
+}

@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import LoginPage from "./pages/Login.jsx";
 import SignupPage from "./pages/Signup.jsx";
 import DashboardPage from "./pages/Dashboard.jsx";
+import LinkAnalyticsPage from "./pages/LinkAnalytics.jsx";
 import { getToken } from "./lib/auth.js";
 import RequireAuth from "./components/RequireAuth.jsx";
 
@@ -31,6 +32,14 @@ export default function App() {
         element={
           <RequireAuth>
             <DashboardPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/dashboard/links/:id"
+        element={
+          <RequireAuth>
+            <LinkAnalyticsPage />
           </RequireAuth>
         }
       />

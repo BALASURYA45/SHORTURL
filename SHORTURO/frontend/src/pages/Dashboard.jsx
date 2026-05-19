@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { createLink, deleteLink, listLinks } from "../lib/api.js";
 import { logout } from "../lib/auth.js";
@@ -179,6 +179,9 @@ export default function DashboardPage() {
                       <div className="cellSub">Created: {formatDate(l.createdAt)}</div>
                     </div>
                     <div className="cellActions">
+                      <Link className="buttonSmall" to={`/dashboard/links/${l.id}`}>
+                        Analytics
+                      </Link>
                       <button className="buttonSmall" type="button" onClick={() => onCopy(l.shortUrl)}>
                         Copy
                       </button>

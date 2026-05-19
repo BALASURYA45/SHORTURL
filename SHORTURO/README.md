@@ -44,3 +44,6 @@ Step-by-step full-stack URL Shortener (React + Node/Express + DB) with authentic
 
 ## Frontend: Dashboard (done)
 - Links CRUD UI: `frontend/src/pages/Dashboard.jsx` (create/list/delete + copy)
+
+## Frontend: Analytics UI (done)
+- Page: `frontend/src/pages/LinkAnalytics.jsx` (`/dashboard/links/:id`)
