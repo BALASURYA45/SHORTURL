@@ -29,3 +29,6 @@ Step-by-step full-stack URL Shortener (React + Node/Express + DB) with authentic
 ## Redirect + Analytics Tracking (done)
 - Redirect route: `backend/src/routes/redirect.js` (`GET /:slug`)
 - Tracking: increments `Link.clicks`, updates `Link.lastVisitedAt`, and writes `Visit` docs
+
+## Analytics Reporting (done)
+- Endpoint: `backend/src/routes/links.js` (`GET /api/links/:id/analytics`)

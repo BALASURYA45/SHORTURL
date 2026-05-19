@@ -2,6 +2,7 @@ const express = require("express");
 const crypto = require("crypto");
 const mongoose = require("mongoose");
 const Link = require("../models/Link");
+const Visit = require("../models/Visit");
 const { env } = require("../config/env");
 const { createLinkSchema } = require("../validation/schemas");
 
@@ -33,6 +34,15 @@ function toLinkResponse(link) {
     clicks: link.clicks,
     lastVisitedAt: link.lastVisitedAt,
     createdAt: link.createdAt
+  };
+}
+
+function toVisitResponse(visit) {
+  return {
+    id: String(visit._id),
+    visitedAt: visit.visitedAt,
+    ip: visit.ip,
+    userAgent: visit.userAgent
   };
 }
 
@@ -81,6 +91,36 @@ router.get("/", async (req, res, next) => {
   }
 });
 
+// GET /api/links/:id/analytics
+router.get("/:id/analytics", async (req, res, next) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ error: "Invalid link id" });
+
+    const link = await Link.findOne({ _id: id, userId }).lean();
+    if (!link) return res.status(404).json({ error: "Link not found" });
+
+    const visits = await Visit.find({ linkId: link._id })
+      .sort({ visitedAt: -1 })
+      .limit(20)
+      .lean();
+
+    return res.json({
+      link: toLinkResponse(link),
+      analytics: {
+        totalClicks: link.clicks,
+        lastVisitedAt: link.lastVisitedAt,
+        recentVisits: visits.map((v) => toVisitResponse(v))
+      }
+    });
+  } catch (err) {
+    return next(err);
+  }
+});
+
 // DELETE /api/links/:id
 router.delete("/:id", async (req, res, next) => {
   try {
@@ -99,4 +139,3 @@ router.delete("/:id", async (req, res, next) => {
 });
 
 module.exports = router;
-
