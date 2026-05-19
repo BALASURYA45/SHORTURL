@@ -120,3 +120,7 @@ export function getPublicStats(slug, { days = 30 } = {}) {
 export function bulkCreateLinks(items) {
   return apiFetch("/api/links/bulk", { method: "POST", body: { items } });
 }
+
+export function getLinkBreakdown(id, { days = 30 } = {}) {
+  return apiFetch(`/api/links/${id}/breakdown?days=${encodeURIComponent(String(days))}`, { method: "GET" });
+}

@@ -291,6 +291,65 @@ router.get("/:id/trends", async (req, res, next) => {
   }
 });
 
+// GET /api/links/:id/breakdown?days=30
+router.get("/:id/breakdown", async (req, res, next) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ error: "Invalid link id" });
+
+    const daysRaw = req.query.days;
+    const days = Math.min(365, Math.max(1, Number.parseInt(String(daysRaw || "30"), 10)));
+    if (!Number.isFinite(days)) return res.status(400).json({ error: "Invalid days" });
+
+    const link = await Link.findOne({ _id: id, userId }).lean();
+    if (!link) return res.status(404).json({ error: "Link not found" });
+
+    const start = new Date();
+    start.setHours(0, 0, 0, 0);
+    start.setDate(start.getDate() - (days - 1));
+
+    const [byBrowser, byOs, byDevice] = await Promise.all([
+      Visit.aggregate([
+        { $match: { linkId: link._id, visitedAt: { $gte: start } } },
+        { $group: { _id: { $ifNull: ["$browser", "Unknown"] }, clicks: { $sum: 1 } } },
+        { $sort: { clicks: -1, _id: 1 } },
+        { $limit: 12 }
+      ]),
+      Visit.aggregate([
+        { $match: { linkId: link._id, visitedAt: { $gte: start } } },
+        { $group: { _id: { $ifNull: ["$os", "Unknown"] }, clicks: { $sum: 1 } } },
+        { $sort: { clicks: -1, _id: 1 } },
+        { $limit: 12 }
+      ]),
+      Visit.aggregate([
+        { $match: { linkId: link._id, visitedAt: { $gte: start } } },
+        { $group: { _id: { $ifNull: ["$device", "Unknown"] }, clicks: { $sum: 1 } } },
+        { $sort: { clicks: -1, _id: 1 } },
+        { $limit: 12 }
+      ])
+    ]);
+
+    function mapRows(rows) {
+      return rows.map((r) => ({ name: r._id, clicks: r.clicks }));
+    }
+
+    return res.json({
+      link: toLinkResponse(link),
+      days,
+      breakdown: {
+        browser: mapRows(byBrowser),
+        os: mapRows(byOs),
+        device: mapRows(byDevice)
+      }
+    });
+  } catch (err) {
+    return next(err);
+  }
+});
+
 // DELETE /api/links/:id
 router.delete("/:id", async (req, res, next) => {
   try {

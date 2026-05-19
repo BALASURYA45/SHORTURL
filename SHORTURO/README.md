@@ -72,3 +72,8 @@ Step-by-step full-stack URL Shortener (React + Node/Express + DB) with authentic
 ## Bulk shorten (done)
 - API: `backend/src/routes/links.js` (`POST /api/links/bulk`)
 - UI: `frontend/src/pages/Bulk.jsx` (`/dashboard/bulk`)
+
+## Device/Browser analytics (done)
+- Tracking: `backend/src/routes/redirect.js` (stores `browser`, `os`, `device` on visits)
+- Reporting: `backend/src/routes/links.js` (`GET /api/links/:id/breakdown?days=30`)
+- UI: `frontend/src/pages/LinkAnalytics.jsx` (Breakdowns section)

@@ -6,10 +6,12 @@ const visitSchema = new mongoose.Schema(
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: false, index: true },
     visitedAt: { type: Date, required: true, default: Date.now, index: true },
     ip: { type: String, default: null },
-    userAgent: { type: String, default: null }
+    userAgent: { type: String, default: null },
+    browser: { type: String, default: null, index: true },
+    os: { type: String, default: null, index: true },
+    device: { type: String, default: null, index: true }
   },
   { timestamps: false }
 );
 
 module.exports = mongoose.model("Visit", visitSchema);
-

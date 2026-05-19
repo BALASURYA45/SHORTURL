@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { getLinkAnalytics, getLinkTrends } from "../lib/api.js";
+import { getLinkAnalytics, getLinkBreakdown, getLinkTrends } from "../lib/api.js";
 import { useToast } from "../components/ToastProvider.jsx";
 
 function formatDate(input) {
@@ -74,6 +74,9 @@ export default function LinkAnalyticsPage() {
   const [trendLoading, setTrendLoading] = useState(true);
   const [trendError, setTrendError] = useState(null);
   const [trend, setTrend] = useState(null);
+  const [breakdownLoading, setBreakdownLoading] = useState(true);
+  const [breakdownError, setBreakdownError] = useState(null);
+  const [breakdown, setBreakdown] = useState(null);
 
   const link = data?.link || null;
   const analytics = data?.analytics || null;
@@ -87,6 +90,8 @@ export default function LinkAnalyticsPage() {
     const s = trend?.series;
     return Array.isArray(s) ? s : [];
   }, [trend]);
+
+  const breakdownData = useMemo(() => breakdown?.breakdown || null, [breakdown]);
 
   useEffect(() => {
     let cancelled = false;
@@ -127,6 +132,41 @@ export default function LinkAnalyticsPage() {
       cancelled = true;
     };
   }, [id, trendDays]);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadBreakdown() {
+      setBreakdownLoading(true);
+      setBreakdownError(null);
+      try {
+        const next = await getLinkBreakdown(id, { days: trendDays });
+        if (!cancelled) setBreakdown(next);
+      } catch (err) {
+        if (!cancelled) setBreakdownError(err?.message || "Failed to load breakdown");
+      } finally {
+        if (!cancelled) setBreakdownLoading(false);
+      }
+    }
+    if (id) loadBreakdown();
+    return () => {
+      cancelled = true;
+    };
+  }, [id, trendDays]);
+
+  function renderBreakdownList(items) {
+    const list = Array.isArray(items) ? items : [];
+    if (!list.length) return <div className="muted">No data yet.</div>;
+    return (
+      <div className="breakdownList">
+        {list.map((it) => (
+          <div className="breakdownRow" key={it.name}>
+            <div className="cellTitle">{it.name}</div>
+            <div className="chip">{formatNumber(Number(it.clicks) || 0)}</div>
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   async function onCopy() {
     const ok = await copyText(link?.shortUrl);
@@ -224,7 +264,34 @@ export default function LinkAnalyticsPage() {
 
             {trendLoading ? <div className="muted">Loading trend...</div> : null}
             {trendError ? <div className="errorBox">{trendError}</div> : null}
-            {!trendLoading && !trendError ? <TrendChart series={series} /> : null}
+          {!trendLoading && !trendError ? <TrendChart series={series} /> : null}
+          </section>
+
+          <section className="card">
+            <div className="row">
+              <h2 className="subtitle">Breakdowns</h2>
+              <span className="muted">{trendDays} days</span>
+            </div>
+
+            {breakdownLoading ? <div className="muted">Loading breakdowns...</div> : null}
+            {breakdownError ? <div className="errorBox">{breakdownError}</div> : null}
+
+            {!breakdownLoading && !breakdownError ? (
+              <div className="breakdownGrid">
+                <div className="detailItem">
+                  <div className="detailLabel">Browser</div>
+                  {renderBreakdownList(breakdownData?.browser)}
+                </div>
+                <div className="detailItem">
+                  <div className="detailLabel">OS</div>
+                  {renderBreakdownList(breakdownData?.os)}
+                </div>
+                <div className="detailItem">
+                  <div className="detailLabel">Device</div>
+                  {renderBreakdownList(breakdownData?.device)}
+                </div>
+              </div>
+            ) : null}
           </section>
 
           <section className="card">

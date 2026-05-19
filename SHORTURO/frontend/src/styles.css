@@ -376,6 +376,32 @@ a:hover {
   justify-content: space-between;
 }
 
+.breakdownGrid {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.breakdownList {
+  margin-top: 10px;
+  display: grid;
+  gap: 8px;
+}
+
+.breakdownRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+@media (max-width: 900px) {
+  .breakdownGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
 
 .card {
   width: min(440px, 100%);
