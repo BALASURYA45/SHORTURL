@@ -252,6 +252,73 @@ a:hover {
   grid-template-columns: 1fr auto;
 }
 
+.editBox {
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  z-index: 40;
+}
+
+.modalCard {
+  width: min(520px, 100%);
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(10, 12, 20, 0.78);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.55);
+}
+
+.qrImg {
+  margin-top: 14px;
+  width: 100%;
+  max-width: 320px;
+  display: block;
+  background: #fff;
+  border-radius: 14px;
+  padding: 12px;
+}
+
+.videoWrap {
+  margin-top: 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.video {
+  width: 100%;
+  height: 320px;
+  display: block;
+  object-fit: cover;
+}
+
+.resultBox {
+  margin-top: 14px;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.resultText {
+  margin-top: 6px;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+
 
 .card {
   width: min(440px, 100%);

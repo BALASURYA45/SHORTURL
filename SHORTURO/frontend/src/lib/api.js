@@ -42,6 +42,38 @@ export async function apiFetch(path, { method = "GET", body, token, headers } = 
   return data;
 }
 
+async function apiFetchBlob(path, { method = "GET", token, headers } = {}) {
+  const authToken = token ?? getToken();
+  const res = await fetch(`${API_BASE_URL}${path}`, {
+    method,
+    headers: {
+      ...(authToken ? { Authorization: `Bearer ${authToken}` } : null),
+      ...(headers || null)
+    }
+  });
+
+  if (!res.ok) {
+    if (res.status === 401) {
+      setToken(null);
+      try {
+        sessionStorage.setItem("shorturo_session_expired", "1");
+      } catch {
+        // ignore
+      }
+      window.dispatchEvent(new Event("shorturo:session-expired"));
+    }
+    let message = `Request failed (${res.status})`;
+    const isJson = (res.headers.get("content-type") || "").includes("application/json");
+    if (isJson) {
+      const data = await res.json().catch(() => null);
+      message = data?.error || message;
+    }
+    throw new ApiError(message, { status: res.status });
+  }
+
+  return res.blob();
+}
+
 export function signup({ email, password }) {
   return apiFetch("/api/auth/signup", { method: "POST", body: { email, password } });
 }
@@ -50,8 +82,8 @@ export function login({ email, password }) {
   return apiFetch("/api/auth/login", { method: "POST", body: { email, password } });
 }
 
-export function createLink({ originalUrl, customSlug }) {
-  return apiFetch("/api/links", { method: "POST", body: { originalUrl, customSlug } });
+export function createLink({ originalUrl, customSlug, expiresAt }) {
+  return apiFetch("/api/links", { method: "POST", body: { originalUrl, customSlug, expiresAt } });
 }
 
 export function listLinks() {
@@ -64,4 +96,12 @@ export function deleteLink(id) {
 
 export function getLinkAnalytics(id) {
   return apiFetch(`/api/links/${id}/analytics`, { method: "GET" });
+}
+
+export function updateLink(id, { originalUrl, customSlug, expiresAt }) {
+  return apiFetch(`/api/links/${id}`, { method: "PATCH", body: { originalUrl, customSlug, expiresAt } });
+}
+
+export function getLinkQrPng(id) {
+  return apiFetchBlob(`/api/links/${id}/qr`, { method: "GET" });
 }

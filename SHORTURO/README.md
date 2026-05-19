@@ -33,6 +33,11 @@ Step-by-step full-stack URL Shortener (React + Node/Express + DB) with authentic
 ## Analytics Reporting (done)
 - Endpoint: `backend/src/routes/links.js` (`GET /api/links/:id/analytics`)
 
+## Edit + Expiry + QR (done)
+- Update link: `backend/src/routes/links.js` (`PATCH /api/links/:id`)
+- Optional expiry: `expiresAt` supported on create/update + enforced on redirect
+- QR code: `backend/src/routes/links.js` (`GET /api/links/:id/qr`)
+
 ## Frontend: Auth UI (done)
 - React app: `frontend/` (Vite)
 - Pages: `frontend/src/pages/Login.jsx`, `frontend/src/pages/Signup.jsx`
@@ -51,3 +56,7 @@ Step-by-step full-stack URL Shortener (React + Node/Express + DB) with authentic
 ## Frontend: UI/UX State (done)
 - Global toasts: `frontend/src/components/ToastProvider.jsx`
 - Session-expired message: `frontend/src/pages/Login.jsx` (set by `frontend/src/lib/api.js` on 401)
+
+## Frontend: Edit/Expiry/QR (done)
+- Edit + expiry UI + QR modal: `frontend/src/pages/Dashboard.jsx`
+- QR scanner page: `frontend/src/pages/Scan.jsx` (`/scan`)

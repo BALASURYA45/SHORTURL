@@ -22,7 +22,18 @@ const slugSchema = z
 
 const createLinkSchema = z.object({
   originalUrl: z.string().url().max(2048),
-  customSlug: slugSchema.optional()
+  customSlug: slugSchema.optional(),
+  expiresAt: z
+    .union([z.string().datetime(), z.null()])
+    .optional()
 });
 
-module.exports = { signupSchema, loginSchema, createLinkSchema };
+const updateLinkSchema = z
+  .object({
+    originalUrl: z.string().url().max(2048).optional(),
+    customSlug: slugSchema.optional(),
+    expiresAt: z.union([z.string().datetime(), z.null()]).optional()
+  })
+  .refine((v) => Object.keys(v).length > 0, { message: "At least one field is required" });
+
+module.exports = { signupSchema, loginSchema, createLinkSchema, updateLinkSchema };

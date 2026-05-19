@@ -4,7 +4,8 @@ const mongoose = require("mongoose");
 const Link = require("../models/Link");
 const Visit = require("../models/Visit");
 const { env } = require("../config/env");
-const { createLinkSchema } = require("../validation/schemas");
+const { createLinkSchema, updateLinkSchema } = require("../validation/schemas");
+const qrcode = require("qrcode");
 
 const router = express.Router();
 
@@ -33,6 +34,7 @@ function toLinkResponse(link) {
     shortUrl: env.baseUrl ? `${env.baseUrl}/${link.slug}` : null,
     clicks: link.clicks,
     lastVisitedAt: link.lastVisitedAt,
+    expiresAt: link.expiresAt,
     createdAt: link.createdAt
   };
 }
@@ -49,20 +51,23 @@ function toVisitResponse(visit) {
 // POST /api/links
 router.post("/", async (req, res, next) => {
   try {
-    const { originalUrl, customSlug } = createLinkSchema.parse(req.body);
+    const { originalUrl, customSlug, expiresAt } = createLinkSchema.parse(req.body);
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
+    const expiresAtValue = expiresAt === null ? null : expiresAt ? new Date(expiresAt) : null;
+    if (expiresAtValue && Number.isNaN(expiresAtValue.getTime())) return res.status(400).json({ error: "Invalid expiresAt" });
+
     const desiredSlug = normalizeSlug(customSlug);
     if (desiredSlug) {
-      const link = await Link.create({ userId, originalUrl, slug: desiredSlug });
+      const link = await Link.create({ userId, originalUrl, slug: desiredSlug, expiresAt: expiresAtValue });
       return res.status(201).json({ link: toLinkResponse(link) });
     }
 
     for (let attempt = 0; attempt < 6; attempt += 1) {
       try {
         const slug = randomSlug(7);
-        const link = await Link.create({ userId, originalUrl, slug });
+        const link = await Link.create({ userId, originalUrl, slug, expiresAt: expiresAtValue });
         return res.status(201).json({ link: toLinkResponse(link) });
       } catch (err) {
         if (isDuplicateKeyError(err)) continue;
@@ -86,6 +91,65 @@ router.get("/", async (req, res, next) => {
 
     const links = await Link.find({ userId }).sort({ createdAt: -1 }).lean();
     res.json({ links: links.map((l) => toLinkResponse(l)) });
+  } catch (err) {
+    return next(err);
+  }
+});
+
+// PATCH /api/links/:id
+router.patch("/:id", async (req, res, next) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ error: "Invalid link id" });
+
+    const { originalUrl, customSlug, expiresAt } = updateLinkSchema.parse(req.body);
+
+    const update = {};
+    if (originalUrl !== undefined) update.originalUrl = originalUrl;
+    if (customSlug !== undefined) update.slug = normalizeSlug(customSlug);
+    if (expiresAt !== undefined) {
+      if (expiresAt === null) update.expiresAt = null;
+      else {
+        const dt = new Date(expiresAt);
+        if (Number.isNaN(dt.getTime())) return res.status(400).json({ error: "Invalid expiresAt" });
+        update.expiresAt = dt;
+      }
+    }
+
+    const link = await Link.findOneAndUpdate({ _id: id, userId }, { $set: update }, { new: true }).lean();
+    if (!link) return res.status(404).json({ error: "Link not found" });
+
+    return res.json({ link: toLinkResponse(link) });
+  } catch (err) {
+    if (err?.name === "ZodError") return res.status(400).json({ error: err.errors?.[0]?.message || "Invalid input" });
+    if (isDuplicateKeyError(err)) return res.status(409).json({ error: "Alias already in use" });
+    return next(err);
+  }
+});
+
+// GET /api/links/:id/qr
+router.get("/:id/qr", async (req, res, next) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ error: "Invalid link id" });
+
+    if (!env.baseUrl) return res.status(400).json({ error: "BASE_URL is not configured" });
+
+    const link = await Link.findOne({ _id: id, userId }).lean();
+    if (!link) return res.status(404).json({ error: "Link not found" });
+
+    const shortUrl = `${env.baseUrl}/${link.slug}`;
+    const png = await qrcode.toBuffer(shortUrl, { type: "png", width: 320, margin: 1, errorCorrectionLevel: "M" });
+
+    res.setHeader("Content-Type", "image/png");
+    res.setHeader("Cache-Control", "no-store");
+    return res.status(200).send(png);
   } catch (err) {
     return next(err);
   }

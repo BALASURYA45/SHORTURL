@@ -4,6 +4,7 @@ import LoginPage from "./pages/Login.jsx";
 import SignupPage from "./pages/Signup.jsx";
 import DashboardPage from "./pages/Dashboard.jsx";
 import LinkAnalyticsPage from "./pages/LinkAnalytics.jsx";
+import ScanPage from "./pages/Scan.jsx";
 import { getToken } from "./lib/auth.js";
 import RequireAuth from "./components/RequireAuth.jsx";
 
@@ -27,6 +28,7 @@ export default function App() {
       <Route path="/" element={<HomeRedirect />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
+      <Route path="/scan" element={<ScanPage />} />
       <Route
         path="/dashboard"
         element={
