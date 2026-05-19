@@ -168,6 +168,12 @@ export default function DashboardPage() {
     toast.push(ok ? "Copied" : "Copy failed", { kind: ok ? "default" : "error" });
   }
 
+  async function onCopyPublicStats(link) {
+    const url = `${window.location.origin}/stats/${link.slug}`;
+    const ok = await copyText(url);
+    toast.push(ok ? "Public stats link copied" : "Copy failed", { kind: ok ? "default" : "error" });
+  }
+
   function startEdit(link) {
     setEditingId(link.id);
     setEditOriginalUrl(link.originalUrl || "");
@@ -319,6 +325,9 @@ export default function DashboardPage() {
                         </button>
                         <button className="buttonSmall" type="button" onClick={() => startEdit(l)}>
                           Edit
+                        </button>
+                        <button className="buttonSmall" type="button" onClick={() => onCopyPublicStats(l)}>
+                          Public stats
                         </button>
                         <button className="buttonSmall" type="button" onClick={() => onCopy(l.shortUrl)}>
                           Copy

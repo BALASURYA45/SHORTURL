@@ -109,3 +109,10 @@ export function getLinkQrPng(id) {
 export function getLinkTrends(id, { days = 30 } = {}) {
   return apiFetch(`/api/links/${id}/trends?days=${encodeURIComponent(String(days))}`, { method: "GET" });
 }
+
+export function getPublicStats(slug, { days = 30 } = {}) {
+  return apiFetch(`/api/public/${encodeURIComponent(String(slug))}?days=${encodeURIComponent(String(days))}`, {
+    method: "GET",
+    token: null
+  });
+}

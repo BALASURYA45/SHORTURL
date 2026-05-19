@@ -8,6 +8,7 @@ const { authRequired } = require("./middleware/auth");
 const authRoutes = require("./routes/auth");
 const linksRoutes = require("./routes/links");
 const redirectRoutes = require("./routes/redirect");
+const publicRoutes = require("./routes/public");
 
 function createApp() {
   const app = express();
@@ -33,6 +34,9 @@ function createApp() {
 
   // Links (protected)
   app.use("/api/links", authRequired, linksRoutes);
+
+  // Public stats (no auth)
+  app.use("/api/public", publicRoutes);
 
   // Redirect (public) - keep after /api routes
   app.use("/", redirectRoutes);
