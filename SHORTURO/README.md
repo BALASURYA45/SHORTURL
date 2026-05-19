@@ -21,3 +21,7 @@ Step-by-step full-stack URL Shortener (React + Node/Express + DB) with authentic
 - Routes: `backend/src/routes/auth.js` (`POST /api/auth/signup`, `POST /api/auth/login`)
 - JWT guard: `backend/src/middleware/auth.js`
 - Validation: `backend/src/validation/schemas.js`
+
+## User/Access Control + Links Management (done)
+- Protected routes: `backend/src/middleware/auth.js`
+- Links API: `backend/src/routes/links.js` (`POST /api/links`, `GET /api/links`, `DELETE /api/links/:id`)

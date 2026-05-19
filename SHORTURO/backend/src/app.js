@@ -4,7 +4,9 @@ const helmet = require("helmet");
 const morgan = require("morgan");
 const { env } = require("./config/env");
 const { notFound, errorHandler } = require("./middleware/errors");
+const { authRequired } = require("./middleware/auth");
 const authRoutes = require("./routes/auth");
+const linksRoutes = require("./routes/links");
 
 function createApp() {
   const app = express();
@@ -27,6 +29,9 @@ function createApp() {
 
   // Auth
   app.use("/api/auth", authRoutes);
+
+  // Links (protected)
+  app.use("/api/links", authRequired, linksRoutes);
 
   app.use(notFound);
   app.use(errorHandler);

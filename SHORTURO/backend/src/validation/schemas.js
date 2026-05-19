@@ -13,5 +13,16 @@ const loginSchema = z.object({
   password: z.string().min(1).max(200)
 });
 
-module.exports = { signupSchema, loginSchema };
+const slugSchema = z
+  .string()
+  .trim()
+  .min(3)
+  .max(40)
+  .regex(/^[a-zA-Z0-9_-]+$/, "Alias may contain only letters, numbers, _ and -");
 
+const createLinkSchema = z.object({
+  originalUrl: z.string().url().max(2048),
+  customSlug: slugSchema.optional()
+});
+
+module.exports = { signupSchema, loginSchema, createLinkSchema };
