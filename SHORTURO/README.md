@@ -32,3 +32,8 @@ Step-by-step full-stack URL Shortener (React + Node/Express + DB) with authentic
 
 ## Analytics Reporting (done)
 - Endpoint: `backend/src/routes/links.js` (`GET /api/links/:id/analytics`)
+
+## Frontend: Auth UI (done)
+- React app: `frontend/` (Vite)
+- Pages: `frontend/src/pages/Login.jsx`, `frontend/src/pages/Signup.jsx`
+- API helper: `frontend/src/lib/api.js` (calls backend auth endpoints)
