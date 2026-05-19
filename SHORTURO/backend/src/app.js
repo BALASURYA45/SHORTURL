@@ -7,6 +7,7 @@ const { notFound, errorHandler } = require("./middleware/errors");
 const { authRequired } = require("./middleware/auth");
 const authRoutes = require("./routes/auth");
 const linksRoutes = require("./routes/links");
+const redirectRoutes = require("./routes/redirect");
 
 function createApp() {
   const app = express();
@@ -32,6 +33,9 @@ function createApp() {
 
   // Links (protected)
   app.use("/api/links", authRequired, linksRoutes);
+
+  // Redirect (public) - keep after /api routes
+  app.use("/", redirectRoutes);
 
   app.use(notFound);
   app.use(errorHandler);

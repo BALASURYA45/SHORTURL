@@ -25,3 +25,7 @@ Step-by-step full-stack URL Shortener (React + Node/Express + DB) with authentic
 ## User/Access Control + Links Management (done)
 - Protected routes: `backend/src/middleware/auth.js`
 - Links API: `backend/src/routes/links.js` (`POST /api/links`, `GET /api/links`, `DELETE /api/links/:id`)
+
+## Redirect + Analytics Tracking (done)
+- Redirect route: `backend/src/routes/redirect.js` (`GET /:slug`)
+- Tracking: increments `Link.clicks`, updates `Link.lastVisitedAt`, and writes `Visit` docs
