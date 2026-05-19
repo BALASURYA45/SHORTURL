@@ -173,11 +173,17 @@ a:hover {
   font-size: 12px;
 }
 
-.toast {
+.toasts {
   position: fixed;
   bottom: 18px;
   left: 50%;
   transform: translateX(-50%);
+  display: grid;
+  gap: 8px;
+  z-index: 50;
+}
+
+.toast {
   padding: 10px 12px;
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.14);
@@ -187,6 +193,11 @@ a:hover {
   font-size: 13px;
 }
 
+.toast_error {
+  border-color: rgba(255, 92, 122, 0.35);
+  background: rgba(255, 92, 122, 0.18);
+}
+
 @media (max-width: 760px) {
   .tableRow {
     grid-template-columns: 1fr;
@@ -194,6 +205,14 @@ a:hover {
   .cellMeta {
     text-align: left;
     min-width: 0;
+  }
+  .cellSub {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  .detailValue {
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
 }
 
@@ -311,6 +330,16 @@ a:hover {
   border-radius: 12px;
   border: 1px solid rgba(255, 92, 122, 0.35);
   background: rgba(255, 92, 122, 0.09);
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 13px;
+}
+
+.infoBox {
+  margin-top: 14px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(66, 210, 255, 0.35);
+  background: rgba(66, 210, 255, 0.09);
   color: rgba(255, 255, 255, 0.92);
   font-size: 13px;
 }

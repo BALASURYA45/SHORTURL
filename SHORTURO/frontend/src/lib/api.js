@@ -26,7 +26,15 @@ export async function apiFetch(path, { method = "GET", body, token, headers } = 
   const data = isJson ? await res.json().catch(() => null) : null;
 
   if (!res.ok) {
-    if (res.status === 401) setToken(null);
+    if (res.status === 401) {
+      setToken(null);
+      try {
+        sessionStorage.setItem("shorturo_session_expired", "1");
+      } catch {
+        // ignore
+      }
+      window.dispatchEvent(new Event("shorturo:session-expired"));
+    }
     const message = data?.error || `Request failed (${res.status})`;
     throw new ApiError(message, { status: res.status });
   }

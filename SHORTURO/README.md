@@ -47,3 +47,7 @@ Step-by-step full-stack URL Shortener (React + Node/Express + DB) with authentic
 
 ## Frontend: Analytics UI (done)
 - Page: `frontend/src/pages/LinkAnalytics.jsx` (`/dashboard/links/:id`)
+
+## Frontend: UI/UX State (done)
+- Global toasts: `frontend/src/components/ToastProvider.jsx`
+- Session-expired message: `frontend/src/pages/Login.jsx` (set by `frontend/src/lib/api.js` on 401)

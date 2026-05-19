@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { createLink, deleteLink, listLinks } from "../lib/api.js";
 import { logout } from "../lib/auth.js";
+import { useToast } from "../components/ToastProvider.jsx";
 
 const createSchema = z.object({
   originalUrl: z.string().url("Enter a valid URL (include https://)").max(2048),
@@ -31,6 +32,7 @@ async function copyText(text) {
 
 export default function DashboardPage() {
   const navigate = useNavigate();
+  const toast = useToast();
   const [originalUrl, setOriginalUrl] = useState("");
   const [customSlug, setCustomSlug] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -38,7 +40,7 @@ export default function DashboardPage() {
   const [links, setLinks] = useState([]);
   const [formError, setFormError] = useState(null);
   const [fieldErrors, setFieldErrors] = useState({});
-  const [toast, setToast] = useState(null);
+  const [deletingIds, setDeletingIds] = useState(() => new Set());
 
   function onLogout() {
     logout();
@@ -67,7 +69,6 @@ export default function DashboardPage() {
     e.preventDefault();
     setFormError(null);
     setFieldErrors({});
-    setToast(null);
 
     const parsed = createSchema.safeParse({ originalUrl, customSlug: customSlug.trim() || undefined });
     if (!parsed.success) {
@@ -84,7 +85,7 @@ export default function DashboardPage() {
       if (link) setLinks((prev) => [link, ...prev]);
       setOriginalUrl("");
       setCustomSlug("");
-      setToast("Short link created");
+      toast.push("Short link created");
     } catch (err) {
       setFormError(err?.message || "Failed to create link");
     } finally {
@@ -93,20 +94,29 @@ export default function DashboardPage() {
   }
 
   async function onDelete(id) {
-    setToast(null);
+    const ok = window.confirm("Delete this link? This cannot be undone.");
+    if (!ok) return;
+
+    setDeletingIds((prev) => new Set(prev).add(id));
     try {
       await deleteLink(id);
       setLinks((prev) => prev.filter((l) => l.id !== id));
-      setToast("Link deleted");
+      toast.push("Link deleted");
     } catch (err) {
-      setToast(err?.message || "Delete failed");
+      toast.push(err?.message || "Delete failed", { kind: "error" });
+    } finally {
+      setDeletingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
     }
   }
 
   async function onCopy(shortUrl) {
     if (!shortUrl) return;
     const ok = await copyText(shortUrl);
-    setToast(ok ? "Copied" : "Copy failed");
+    toast.push(ok ? "Copied" : "Copy failed", { kind: ok ? "default" : "error" });
   }
 
   return (
@@ -185,8 +195,13 @@ export default function DashboardPage() {
                       <button className="buttonSmall" type="button" onClick={() => onCopy(l.shortUrl)}>
                         Copy
                       </button>
-                      <button className="buttonDanger" type="button" onClick={() => onDelete(l.id)}>
-                        Delete
+                      <button
+                        className="buttonDanger"
+                        type="button"
+                        onClick={() => onDelete(l.id)}
+                        disabled={deletingIds.has(l.id)}
+                      >
+                        {deletingIds.has(l.id) ? "Deleting..." : "Delete"}
                       </button>
                     </div>
                   </div>
@@ -194,8 +209,6 @@ export default function DashboardPage() {
               </div>
             ) : null}
           </section>
-
-          {toast ? <div className="toast">{toast}</div> : null}
         </div>
       </main>
     </div>

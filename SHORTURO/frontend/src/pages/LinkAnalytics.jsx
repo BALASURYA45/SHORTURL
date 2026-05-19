@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { getLinkAnalytics } from "../lib/api.js";
+import { useToast } from "../components/ToastProvider.jsx";
 
 function formatDate(input) {
   if (!input) return "—";
@@ -21,10 +22,10 @@ async function copyText(text) {
 export default function LinkAnalyticsPage() {
   const navigate = useNavigate();
   const { id } = useParams();
+  const toast = useToast();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [data, setData] = useState(null);
-  const [toast, setToast] = useState(null);
 
   const link = data?.link || null;
   const analytics = data?.analytics || null;
@@ -56,7 +57,7 @@ export default function LinkAnalyticsPage() {
 
   async function onCopy() {
     const ok = await copyText(link?.shortUrl);
-    setToast(ok ? "Copied" : "Copy failed");
+    toast.push(ok ? "Copied" : "Copy failed", { kind: ok ? "default" : "error" });
   }
 
   return (
@@ -158,10 +159,8 @@ export default function LinkAnalyticsPage() {
             </div>
           </section>
 
-          {toast ? <div className="toast">{toast}</div> : null}
         </div>
       </main>
     </div>
   );
 }
-

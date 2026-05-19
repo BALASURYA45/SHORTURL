@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { signup } from "../lib/api.js";
 import { setToken } from "../lib/auth.js";
+import { useToast } from "../components/ToastProvider.jsx";
 
 const schema = z
   .object({
@@ -17,6 +18,7 @@ const schema = z
 
 export default function SignupPage() {
   const navigate = useNavigate();
+  const toast = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -46,6 +48,7 @@ export default function SignupPage() {
     try {
       const data = await signup({ email: parsed.data.email, password: parsed.data.password });
       setToken(data?.token);
+      toast.push("Account created");
       navigate("/dashboard", { replace: true });
     } catch (err) {
       setFormError(err?.message || "Signup failed");
@@ -112,4 +115,3 @@ export default function SignupPage() {
     </div>
   );
 }
-
