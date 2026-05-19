@@ -185,6 +185,56 @@ router.get("/:id/analytics", async (req, res, next) => {
   }
 });
 
+// GET /api/links/:id/trends?days=30
+router.get("/:id/trends", async (req, res, next) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ error: "Invalid link id" });
+
+    const daysRaw = req.query.days;
+    const days = Math.min(365, Math.max(1, Number.parseInt(String(daysRaw || "30"), 10)));
+    if (!Number.isFinite(days)) return res.status(400).json({ error: "Invalid days" });
+
+    const link = await Link.findOne({ _id: id, userId }).lean();
+    if (!link) return res.status(404).json({ error: "Link not found" });
+
+    const start = new Date();
+    start.setHours(0, 0, 0, 0);
+    start.setDate(start.getDate() - (days - 1));
+
+    const rows = await Visit.aggregate([
+      { $match: { linkId: link._id, visitedAt: { $gte: start } } },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$visitedAt" } },
+          clicks: { $sum: 1 }
+        }
+      },
+      { $sort: { _id: 1 } }
+    ]);
+
+    const byDate = new Map(rows.map((r) => [r._id, r.clicks]));
+    const series = [];
+    for (let i = 0; i < days; i += 1) {
+      const d = new Date(start);
+      d.setDate(start.getDate() + i);
+      const key = d.toISOString().slice(0, 10);
+      series.push({ date: key, clicks: byDate.get(key) || 0 });
+    }
+
+    return res.json({
+      link: toLinkResponse(link),
+      days,
+      series
+    });
+  } catch (err) {
+    return next(err);
+  }
+});
+
 // DELETE /api/links/:id
 router.delete("/:id", async (req, res, next) => {
   try {

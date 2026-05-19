@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { getLinkAnalytics } from "../lib/api.js";
+import { getLinkAnalytics, getLinkTrends } from "../lib/api.js";
 import { useToast } from "../components/ToastProvider.jsx";
 
 function formatDate(input) {
@@ -8,6 +8,50 @@ function formatDate(input) {
   const dt = new Date(input);
   if (Number.isNaN(dt.getTime())) return "—";
   return dt.toLocaleString();
+}
+
+function formatNumber(n) {
+  if (!Number.isFinite(n)) return "0";
+  return new Intl.NumberFormat().format(n);
+}
+
+function maxOf(arr) {
+  let m = 0;
+  for (const v of arr) m = Math.max(m, v);
+  return m;
+}
+
+function TrendChart({ series }) {
+  const w = 640;
+  const h = 160;
+  const padX = 10;
+  const padY = 12;
+
+  const points = Array.isArray(series) ? series : [];
+  const clicks = points.map((p) => Number(p.clicks) || 0);
+  const maxClicks = Math.max(1, maxOf(clicks));
+
+  const stepX = points.length > 1 ? (w - padX * 2) / (points.length - 1) : 0;
+
+  const d = points
+    .map((p, i) => {
+      const x = padX + i * stepX;
+      const y = padY + (h - padY * 2) * (1 - (Number(p.clicks) || 0) / maxClicks);
+      return `${i === 0 ? "M" : "L"} ${x.toFixed(1)} ${y.toFixed(1)}`;
+    })
+    .join(" ");
+
+  return (
+    <div className="chartWrap">
+      <svg viewBox={`0 0 ${w} ${h}`} className="chart" role="img" aria-label="Daily clicks trend chart">
+        <path d={`M ${padX} ${h - padY} H ${w - padX}`} className="chartAxis" />
+        <path d={d} className="chartLine" />
+      </svg>
+      <div className="chartMeta">
+        <span className="muted">Max/day: {formatNumber(maxClicks)}</span>
+      </div>
+    </div>
+  );
 }
 
 async function copyText(text) {
@@ -26,6 +70,10 @@ export default function LinkAnalyticsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [data, setData] = useState(null);
+  const [trendDays, setTrendDays] = useState(30);
+  const [trendLoading, setTrendLoading] = useState(true);
+  const [trendError, setTrendError] = useState(null);
+  const [trend, setTrend] = useState(null);
 
   const link = data?.link || null;
   const analytics = data?.analytics || null;
@@ -34,6 +82,11 @@ export default function LinkAnalyticsPage() {
     const visits = analytics?.recentVisits;
     return Array.isArray(visits) ? visits : [];
   }, [analytics]);
+
+  const series = useMemo(() => {
+    const s = trend?.series;
+    return Array.isArray(s) ? s : [];
+  }, [trend]);
 
   useEffect(() => {
     let cancelled = false;
@@ -54,6 +107,26 @@ export default function LinkAnalyticsPage() {
       cancelled = true;
     };
   }, [id]);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadTrend() {
+      setTrendLoading(true);
+      setTrendError(null);
+      try {
+        const next = await getLinkTrends(id, { days: trendDays });
+        if (!cancelled) setTrend(next);
+      } catch (err) {
+        if (!cancelled) setTrendError(err?.message || "Failed to load trend");
+      } finally {
+        if (!cancelled) setTrendLoading(false);
+      }
+    }
+    if (id) loadTrend();
+    return () => {
+      cancelled = true;
+    };
+  }, [id, trendDays]);
 
   async function onCopy() {
     const ok = await copyText(link?.shortUrl);
@@ -126,6 +199,32 @@ export default function LinkAnalyticsPage() {
                 </div>
               </div>
             ) : null}
+          </section>
+
+          <section className="card">
+            <div className="row">
+              <h2 className="subtitle">Daily clicks</h2>
+              <div className="row">
+                <button
+                  className={`buttonSmall ${trendDays === 7 ? "buttonSmallActive" : ""}`}
+                  type="button"
+                  onClick={() => setTrendDays(7)}
+                >
+                  7d
+                </button>
+                <button
+                  className={`buttonSmall ${trendDays === 30 ? "buttonSmallActive" : ""}`}
+                  type="button"
+                  onClick={() => setTrendDays(30)}
+                >
+                  30d
+                </button>
+              </div>
+            </div>
+
+            {trendLoading ? <div className="muted">Loading trend...</div> : null}
+            {trendError ? <div className="errorBox">{trendError}</div> : null}
+            {!trendLoading && !trendError ? <TrendChart series={series} /> : null}
           </section>
 
           <section className="card">

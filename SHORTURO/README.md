@@ -60,3 +60,7 @@ Step-by-step full-stack URL Shortener (React + Node/Express + DB) with authentic
 ## Frontend: Edit/Expiry/QR (done)
 - Edit + expiry UI + QR modal: `frontend/src/pages/Dashboard.jsx`
 - QR scanner page: `frontend/src/pages/Scan.jsx` (`/scan`)
+
+## Trends chart (done)
+- API: `backend/src/routes/links.js` (`GET /api/links/:id/trends?days=30`)
+- UI: `frontend/src/pages/LinkAnalytics.jsx` (7d/30d SVG chart)

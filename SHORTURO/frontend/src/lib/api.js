@@ -105,3 +105,7 @@ export function updateLink(id, { originalUrl, customSlug, expiresAt }) {
 export function getLinkQrPng(id) {
   return apiFetchBlob(`/api/links/${id}/qr`, { method: "GET" });
 }
+
+export function getLinkTrends(id, { days = 30 } = {}) {
+  return apiFetch(`/api/links/${id}/trends?days=${encodeURIComponent(String(days))}`, { method: "GET" });
+}

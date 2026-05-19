@@ -319,6 +319,42 @@ a:hover {
   overflow-wrap: anywhere;
 }
 
+.buttonSmallActive {
+  border-color: rgba(66, 210, 255, 0.55);
+  box-shadow: 0 0 0 4px rgba(66, 210, 255, 0.10);
+}
+
+.chartWrap {
+  margin-top: 12px;
+}
+
+.chart {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.chartAxis {
+  stroke: rgba(255, 255, 255, 0.18);
+  stroke-width: 2;
+  fill: none;
+}
+
+.chartLine {
+  stroke: rgba(66, 210, 255, 0.92);
+  stroke-width: 3;
+  fill: none;
+}
+
+.chartMeta {
+  margin-top: 8px;
+  display: flex;
+  justify-content: space-between;
+}
+
 
 .card {
   width: min(440px, 100%);
