@@ -112,7 +112,7 @@ export default function ScanPage() {
           {error ? <div className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm">{error}</div> : null}
 
           <div className="overflow-hidden rounded-lg border bg-card/40">
-            <video ref={videoRef} className="h-[320px] w-full object-cover" muted playsInline />
+            <video ref={videoRef} className="h-[45vh] min-h-[240px] w-full max-h-[420px] object-cover" muted playsInline />
           </div>
 
           {result ? (
@@ -145,4 +145,3 @@ export default function ScanPage() {
     </div>
   );
 }
-

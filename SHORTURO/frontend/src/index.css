@@ -54,6 +54,7 @@
 
   body {
     @apply bg-background text-foreground;
+    overflow-x: hidden;
     font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji",
       "Segoe UI Emoji";
   }

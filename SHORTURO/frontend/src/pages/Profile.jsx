@@ -832,7 +832,10 @@ export default function ProfilePage() {
 
       {qrLink ? (
         <div className="fixed inset-0 z-40 grid place-items-center bg-black/60 p-4" onMouseDown={closeQr}>
-          <div className="w-full max-w-2xl rounded-2xl border bg-card p-5 shadow-xl" onMouseDown={(e) => e.stopPropagation()}>
+          <div
+            className="w-full max-w-2xl max-h-[calc(100vh-2rem)] overflow-y-auto overscroll-contain rounded-2xl border bg-card p-5 shadow-xl"
+            onMouseDown={(e) => e.stopPropagation()}
+          >
             <div className="flex items-start justify-between gap-4">
               <div>
                 <div className="text-lg font-semibold">QR code</div>
@@ -873,7 +876,7 @@ export default function ProfilePage() {
               </div>
             </div>
             <div className="mt-4 grid gap-4 md:grid-cols-2">
-              <div className="rounded-2xl border bg-background/60 p-4">
+              <div className="order-2 rounded-2xl border bg-background/60 p-4 md:order-none">
                 <div className="text-sm font-semibold">Design</div>
                 <div className="mt-3 grid gap-3">
                   <div className="grid grid-cols-2 gap-3">
@@ -971,7 +974,7 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              <div className="rounded-2xl border bg-background/60 p-4">
+              <div className="order-1 rounded-2xl border bg-background/60 p-4 md:order-none">
                 <div className="flex items-center justify-between">
                   <div className="text-sm font-semibold">Preview</div>
                   <Button type="button" variant="outline" size="sm" onClick={() => onShowQr(qrLink)} disabled={!qrLink}>
@@ -981,12 +984,15 @@ export default function ProfilePage() {
                 <div className="mt-4 grid place-items-center">
                   {qrFormat === "svg" ? (
                     qrSvg ? (
-                      <div className="w-full max-w-[360px] rounded-xl bg-white p-3" dangerouslySetInnerHTML={{ __html: qrSvg }} />
+                      <div
+                        className="w-full max-w-[280px] rounded-xl bg-white p-3 sm:max-w-[360px]"
+                        dangerouslySetInnerHTML={{ __html: qrSvg }}
+                      />
                     ) : (
                       <div className="text-sm text-muted-foreground">Loading...</div>
                     )
                   ) : qrUrl ? (
-                    <img src={qrUrl} alt="QR code" className="w-full max-w-[360px] rounded-xl bg-white p-3" />
+                    <img src={qrUrl} alt="QR code" className="w-full max-w-[280px] rounded-xl bg-white p-3 sm:max-w-[360px]" />
                   ) : (
                     <div className="text-sm text-muted-foreground">Loading...</div>
                   )}
@@ -999,7 +1005,10 @@ export default function ProfilePage() {
 
       {editingLink ? (
         <div className="fixed inset-0 z-40 grid place-items-center bg-black/60 p-4" onMouseDown={closeEdit}>
-          <div className="w-full max-w-lg rounded-xl border bg-card p-5 shadow-xl" onMouseDown={(e) => e.stopPropagation()}>
+          <div
+            className="w-full max-w-lg max-h-[calc(100vh-2rem)] overflow-y-auto overscroll-contain rounded-xl border bg-card p-5 shadow-xl"
+            onMouseDown={(e) => e.stopPropagation()}
+          >
             <div className="flex items-start justify-between gap-4">
               <div>
                 <div className="text-lg font-semibold">Edit link</div>
@@ -1039,7 +1048,10 @@ export default function ProfilePage() {
 
       {shareLink ? (
         <div className="fixed inset-0 z-40 grid place-items-center bg-black/60 p-4" onMouseDown={closeShare}>
-          <div className="w-full max-w-md rounded-xl border bg-card p-5 shadow-xl" onMouseDown={(e) => e.stopPropagation()}>
+          <div
+            className="w-full max-w-md max-h-[calc(100vh-2rem)] overflow-y-auto overscroll-contain rounded-xl border bg-card p-5 shadow-xl"
+            onMouseDown={(e) => e.stopPropagation()}
+          >
             <div className="flex items-start justify-between gap-4">
               <div>
                 <div className="text-lg font-semibold">Share link</div>

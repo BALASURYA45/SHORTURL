@@ -1028,7 +1028,7 @@ export default function DashboardPage() {
        {qrLink ? (
          <div className="fixed inset-0 z-40 grid place-items-center bg-black/60 p-4" onMouseDown={closeQr}>
             <div
-              className="w-full max-w-2xl rounded-2xl border bg-card p-5 shadow-xl"
+              className="w-full max-w-2xl max-h-[calc(100vh-2rem)] overflow-y-auto overscroll-contain rounded-2xl border bg-card p-5 shadow-xl"
               onMouseDown={(e) => e.stopPropagation()}
             >
               <div className="flex items-start justify-between gap-4">
@@ -1046,7 +1046,7 @@ export default function DashboardPage() {
                 </div>
               </div>
               <div className="mt-4 grid gap-4 md:grid-cols-2">
-                <div className="rounded-2xl border bg-background/60 p-4">
+                <div className="order-2 rounded-2xl border bg-background/60 p-4 md:order-none">
                   <div className="text-sm font-semibold">Design</div>
                   <div className="mt-3 grid gap-3">
                     <div className="grid grid-cols-2 gap-3">
@@ -1178,7 +1178,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                <div className="rounded-2xl border bg-background/60 p-4">
+                <div className="order-1 rounded-2xl border bg-background/60 p-4 md:order-none">
                   <div className="flex items-center justify-between">
                     <div className="text-sm font-semibold">Preview</div>
                     <DropdownMenu>
@@ -1219,12 +1219,15 @@ export default function DashboardPage() {
                   <div className="mt-4 grid place-items-center">
                     {qrFormat === "svg" ? (
                       qrSvg ? (
-                        <div className="w-full max-w-[360px] rounded-xl bg-white p-3" dangerouslySetInnerHTML={{ __html: qrSvg }} />
+                        <div
+                          className="w-full max-w-[280px] rounded-xl bg-white p-3 sm:max-w-[360px]"
+                          dangerouslySetInnerHTML={{ __html: qrSvg }}
+                        />
                       ) : (
                         <div className="text-sm text-muted-foreground">Loading...</div>
                       )
                     ) : qrUrl ? (
-                      <img className="w-full max-w-[360px] rounded-xl bg-white p-3" src={qrUrl} alt="QR code" />
+                      <img className="w-full max-w-[280px] rounded-xl bg-white p-3 sm:max-w-[360px]" src={qrUrl} alt="QR code" />
                     ) : (
                       <div className="text-sm text-muted-foreground">Loading...</div>
                     )}
