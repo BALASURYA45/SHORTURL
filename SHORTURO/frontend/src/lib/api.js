@@ -35,7 +35,11 @@ export async function apiFetch(path, { method = "GET", body, token, headers } = 
       }
       window.dispatchEvent(new Event("shorturo:session-expired"));
     }
-    const message = data?.error || `Request failed (${res.status})`;
+    const message =
+      data?.error ||
+      (res.status === 503
+        ? "Service unavailable (503). The backend may be down or still waking up."
+        : `Request failed (${res.status})`);
     throw new ApiError(message, { status: res.status });
   }
 
@@ -68,6 +72,9 @@ async function apiFetchBlob(path, { method = "GET", token, headers } = {}) {
       const data = await res.json().catch(() => null);
       message = data?.error || message;
     }
+    if (res.status === 503 && message.startsWith("Request failed (503)")) {
+      message = "Service unavailable (503). The backend may be down or still waking up.";
+    }
     throw new ApiError(message, { status: res.status });
   }
 
@@ -99,6 +106,9 @@ export async function apiFetchText(path, { method = "GET", token, headers } = {}
     if (isJson) {
       const data = await res.json().catch(() => null);
       message = data?.error || message;
+    }
+    if (res.status === 503 && message.startsWith("Request failed (503)")) {
+      message = "Service unavailable (503). The backend may be down or still waking up.";
     }
     throw new ApiError(message, { status: res.status });
   }

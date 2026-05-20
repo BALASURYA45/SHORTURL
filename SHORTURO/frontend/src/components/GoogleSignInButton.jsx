@@ -29,8 +29,13 @@ function loadGoogleScript() {
 
 export default function GoogleSignInButton({ onCredential, disabled = false }) {
   const containerRef = useRef(null);
+  const onCredentialRef = useRef(onCredential);
   const [ready, setReady] = useState(false);
   const [error, setError] = useState(null);
+
+  useEffect(() => {
+    onCredentialRef.current = onCredential;
+  }, [onCredential]);
 
   useEffect(() => {
     let cancelled = false;
@@ -45,12 +50,18 @@ export default function GoogleSignInButton({ onCredential, disabled = false }) {
         await loadGoogleScript();
         if (cancelled || !window.google?.accounts?.id || !containerRef.current) return;
 
-        window.google.accounts.id.initialize({
-          client_id: GOOGLE_CLIENT_ID,
-          callback: (response) => {
-            if (response?.credential) onCredential(response.credential);
-          }
-        });
+        const gsiStateKey = "__shorturo_gsi_client_id__";
+        const alreadyInitializedForClient = window[gsiStateKey] === GOOGLE_CLIENT_ID;
+        if (!alreadyInitializedForClient) {
+          window.google.accounts.id.initialize({
+            client_id: GOOGLE_CLIENT_ID,
+            callback: (response) => {
+              const handler = onCredentialRef.current;
+              if (response?.credential && typeof handler === "function") handler(response.credential);
+            }
+          });
+          window[gsiStateKey] = GOOGLE_CLIENT_ID;
+        }
 
         containerRef.current.innerHTML = "";
         window.google.accounts.id.renderButton(containerRef.current, {
@@ -70,7 +81,7 @@ export default function GoogleSignInButton({ onCredential, disabled = false }) {
     return () => {
       cancelled = true;
     };
-  }, [onCredential]);
+  }, []);
 
   if (error) {
     return <div className="text-xs text-muted-foreground">{error}</div>;
