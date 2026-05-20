@@ -44,7 +44,9 @@ function readCsvLower(name) {
 const env = {
   nodeEnv: readEnv("NODE_ENV", "development"),
   port: Number.parseInt(readEnv("PORT", "4000"), 10),
+  // Comma-separated list is supported. Wildcards like "*.vercel.app" are supported in app-level CORS checks.
   frontendOrigin: readEnv("FRONTEND_ORIGIN", "http://localhost:5173"),
+  frontendOrigins: null,
   baseUrl: normalizeBaseUrl(readEnv("BASE_URL", "http://localhost:4000")),
 
   // required later 
@@ -57,6 +59,9 @@ const env = {
   trustProxy: readBool("TRUST_PROXY", false),
   adminEmails: readCsvLower("ADMIN_EMAILS")
 };
+
+env.frontendOrigins = readCsvLower("FRONTEND_ORIGIN");
+if (!env.frontendOrigins.length && env.frontendOrigin) env.frontendOrigins = [String(env.frontendOrigin).trim().toLowerCase()];
 
 function assertValidEnv() {
   if (!Number.isFinite(env.port) || env.port <= 0) throw new Error("PORT must be a valid number");

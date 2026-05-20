@@ -13,6 +13,36 @@ const publicRoutes = require("./routes/public");
 const accountRoutes = require("./routes/account");
 const adminRoutes = require("./routes/admin");
 
+function isAllowedOrigin(origin, allowed) {
+  if (!origin) return true; // server-to-server / curl
+  const o = String(origin).trim();
+  if (!o) return true;
+
+  let originUrl;
+  try {
+    originUrl = new URL(o);
+  } catch {
+    return false;
+  }
+
+  const originLower = originUrl.origin.toLowerCase();
+  const hostname = originUrl.hostname.toLowerCase();
+
+  for (const ruleRaw of allowed || []) {
+    const rule = String(ruleRaw || "").trim().toLowerCase();
+    if (!rule) continue;
+    if (rule === "*") return true;
+    if (rule === originLower) return true;
+
+    if (rule.startsWith("*.")) {
+      const suffix = rule.slice(1); // ".vercel.app"
+      if (hostname.endsWith(suffix)) return true;
+    }
+  }
+
+  return false;
+}
+
 function createApp() {
   const app = express();
   app.set("trust proxy", env.trustProxy);
@@ -21,7 +51,11 @@ function createApp() {
   app.use(helmet());
   app.use(
     cors({
-      origin: env.frontendOrigin,
+      origin: (origin, cb) => {
+        const allowed = env.frontendOrigins?.length ? env.frontendOrigins : [String(env.frontendOrigin || "").toLowerCase()];
+        const ok = isAllowedOrigin(origin, allowed);
+        cb(ok ? null : new Error("Not allowed by CORS"), ok);
+      },
       credentials: true
     })
   );
