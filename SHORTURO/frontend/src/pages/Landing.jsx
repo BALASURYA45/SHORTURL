@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { createLink } from "../lib/api.js";
 import { getToken } from "../lib/auth.js";
+import { isSuspiciousUrl } from "../lib/urlSafety.js";
 import ThemeToggle from "../components/ThemeToggle.jsx";
 import { useToast } from "../components/ToastProvider.jsx";
 import { Badge } from "../components/ui/badge.jsx";
@@ -57,6 +58,10 @@ export default function LandingPage() {
     const url = originalUrl.trim();
     if (!url) {
       toast.push("Paste a URL first", { kind: "error" });
+      return;
+    }
+    if (isSuspiciousUrl(url)) {
+      toast.push("URL looks suspicious.", { kind: "error" });
       return;
     }
 

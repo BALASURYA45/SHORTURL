@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { z } from "zod";
 import { bulkCreateLinks } from "../lib/api.js";
+import { isSuspiciousUrl } from "../lib/urlSafety.js";
 import { useToast } from "../components/ToastProvider.jsx";
 import { Badge } from "../components/ui/badge.jsx";
 import { Button } from "../components/ui/button.jsx";
@@ -138,6 +139,11 @@ export default function BulkPage() {
         ...(customSlug ? { customSlug } : null),
         ...(expiresAtIso !== undefined ? { expiresAt: expiresAtIso || null } : null)
       };
+
+      if (isSuspiciousUrl(originalUrl)) {
+        rowErrors.push(`Row ${r + 2}: URL looks suspicious.`);
+        continue;
+      }
 
       const ok = rowSchema.safeParse(item);
       if (!ok.success) {
@@ -283,4 +289,3 @@ export default function BulkPage() {
     </div>
   );
 }
-

@@ -131,10 +131,15 @@ router.post("/", async (req, res, next) => {
     const userId = req.user?.id;
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
-    const safety = await checkUrlSafety(originalUrl, { mode: env.urlSafetyMode, safeBrowsingApiKey: env.safeBrowsingApiKey });
+    const safety = await checkUrlSafety(originalUrl, {
+      mode: env.urlSafetyMode,
+      safeBrowsingApiKey: env.safeBrowsingApiKey,
+      openaiApiKey: env.openaiApiKey,
+      openaiModel: env.openaiModel
+    });
     if (!safety.ok) {
       if (safety.verdict === "unsafe") {
-        return res.status(400).json({ error: "The URL you’re trying to shorten is an unsafe URL.", code: "unsafe_url" });
+        return res.status(400).json({ error: "URL looks suspicious.", code: "suspicious_url" });
       }
       return res.status(400).json({
         error: "URL not matching with global URL lists.",
@@ -206,11 +211,16 @@ router.post("/bulk", async (req, res, next) => {
       const it = items[i];
       try {
         // eslint-disable-next-line no-await-in-loop
-        const safety = await checkUrlSafety(it.originalUrl, { mode: env.urlSafetyMode, safeBrowsingApiKey: env.safeBrowsingApiKey });
+        const safety = await checkUrlSafety(it.originalUrl, {
+          mode: env.urlSafetyMode,
+          safeBrowsingApiKey: env.safeBrowsingApiKey,
+          openaiApiKey: env.openaiApiKey,
+          openaiModel: env.openaiModel
+        });
         if (!safety.ok) {
           const message =
             safety.verdict === "unsafe"
-              ? "The URL you’re trying to shorten is an unsafe URL."
+              ? "URL looks suspicious."
               : "URL not matching with global URL lists.";
           results.push({ index: i, ok: false, error: message });
           continue;

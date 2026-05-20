@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { z } from "zod";
 import { createLink, deleteLink, getLinkQr, listLinks, regenerateLinkSlug, updateLink } from "../lib/api.js";
+import { isSuspiciousUrl } from "../lib/urlSafety.js";
 import { useToast } from "../components/ToastProvider.jsx";
 import { Badge } from "../components/ui/badge.jsx";
 import { Button } from "../components/ui/button.jsx";
@@ -480,6 +481,10 @@ export default function DashboardPage() {
       const next = {};
       for (const issue of parsed.error.issues) next[issue.path[0]] = issue.message;
       setFieldErrors(next);
+      return;
+    }
+    if (isSuspiciousUrl(parsed.data.originalUrl)) {
+      setFormError("URL looks suspicious.");
       return;
     }
 

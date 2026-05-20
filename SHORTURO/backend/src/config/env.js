@@ -62,10 +62,19 @@ const env = {
   // URL safety checks
   urlSafetyMode: readEnv("URL_SAFETY_MODE", "heuristic"),
   safeBrowsingApiKey: readEnv("SAFE_BROWSING_API_KEY", "")
+  ,
+  openaiApiKey: readEnv("OPENAI_API_KEY", ""),
+  openaiModel: readEnv("OPENAI_MODEL", "gpt-4o-mini")
 };
 
 env.frontendOrigins = readCsvLower("FRONTEND_ORIGIN");
 if (!env.frontendOrigins.length && env.frontendOrigin) env.frontendOrigins = [String(env.frontendOrigin).trim().toLowerCase()];
+if (env.nodeEnv !== "production") {
+  for (const origin of ["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:3000", "http://127.0.0.1:3000"]) {
+    const lower = origin.toLowerCase();
+    if (!env.frontendOrigins.includes(lower)) env.frontendOrigins.push(lower);
+  }
+}
 
 function assertValidEnv() {
   if (!Number.isFinite(env.port) || env.port <= 0) throw new Error("PORT must be a valid number");
