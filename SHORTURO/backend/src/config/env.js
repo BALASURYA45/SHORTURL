@@ -57,7 +57,11 @@ const env = {
   // optional
   geoLite2CityMmdbPath: readEnv("GEOLITE2_CITY_MMDB_PATH", null),
   trustProxy: readBool("TRUST_PROXY", false),
-  adminEmails: readCsvLower("ADMIN_EMAILS")
+  adminEmails: readCsvLower("ADMIN_EMAILS"),
+
+  // URL safety checks
+  urlSafetyMode: readEnv("URL_SAFETY_MODE", "heuristic"),
+  safeBrowsingApiKey: readEnv("SAFE_BROWSING_API_KEY", "")
 };
 
 env.frontendOrigins = readCsvLower("FRONTEND_ORIGIN");
