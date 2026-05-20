@@ -77,3 +77,9 @@ Step-by-step full-stack URL Shortener (React + Node/Express + DB) with authentic
 - Tracking: `backend/src/routes/redirect.js` (stores `browser`, `os`, `device` on visits)
 - Reporting: `backend/src/routes/links.js` (`GET /api/links/:id/breakdown?days=30`)
 - UI: `frontend/src/pages/LinkAnalytics.jsx` (Breakdowns section)
+
+## Geo analytics (optional, done)
+- Install GeoLite2 City DB and set `GEOLITE2_CITY_MMDB_PATH` in `backend/.env`
+- Tracking: `backend/src/routes/redirect.js` (stores `country`, `region`, `city`, `latitude`, `longitude`)
+- Reporting: `backend/src/routes/links.js` (`GET /api/links/:id/geo?days=30`)
+- UI: `frontend/src/pages/LinkAnalytics.jsx` (Geo analytics section)

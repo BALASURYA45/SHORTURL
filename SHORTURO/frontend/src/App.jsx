@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import LandingPage from "./pages/Landing.jsx";
 import LoginPage from "./pages/Login.jsx";
 import SignupPage from "./pages/Signup.jsx";
 import DashboardPage from "./pages/Dashboard.jsx";
@@ -7,11 +8,13 @@ import LinkAnalyticsPage from "./pages/LinkAnalytics.jsx";
 import ScanPage from "./pages/Scan.jsx";
 import PublicStatsPage from "./pages/PublicStats.jsx";
 import BulkPage from "./pages/Bulk.jsx";
+import ProfilePage from "./pages/Profile.jsx";
 import { getToken } from "./lib/auth.js";
 import RequireAuth from "./components/RequireAuth.jsx";
+import AppShell from "./components/AppShell.jsx";
 
 function HomeRedirect() {
-  return <Navigate to={getToken() ? "/dashboard" : "/login"} replace />;
+  return <LandingPage />;
 }
 
 export default function App() {
@@ -30,13 +33,24 @@ export default function App() {
       <Route path="/" element={<HomeRedirect />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
-      <Route path="/scan" element={<ScanPage />} />
+      <Route
+        path="/scan"
+        element={
+          <RequireAuth>
+            <AppShell>
+              <ScanPage />
+            </AppShell>
+          </RequireAuth>
+        }
+      />
       <Route path="/stats/:slug" element={<PublicStatsPage />} />
       <Route
         path="/dashboard/bulk"
         element={
           <RequireAuth>
-            <BulkPage />
+            <AppShell>
+              <BulkPage />
+            </AppShell>
           </RequireAuth>
         }
       />
@@ -44,7 +58,9 @@ export default function App() {
         path="/dashboard"
         element={
           <RequireAuth>
-            <DashboardPage />
+            <AppShell>
+              <DashboardPage />
+            </AppShell>
           </RequireAuth>
         }
       />
@@ -52,7 +68,19 @@ export default function App() {
         path="/dashboard/links/:id"
         element={
           <RequireAuth>
-            <LinkAnalyticsPage />
+            <AppShell>
+              <LinkAnalyticsPage />
+            </AppShell>
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/dashboard/profile"
+        element={
+          <RequireAuth>
+            <AppShell>
+              <ProfilePage />
+            </AppShell>
           </RequireAuth>
         }
       />

@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useMemo, useState } from "react";
+import { cn } from "../lib/utils.js";
 
 const ToastContext = createContext(null);
 
@@ -22,9 +23,19 @@ export function ToastProvider({ children }) {
   return (
     <ToastContext.Provider value={api}>
       {children}
-      <div className="toasts" aria-live="polite" aria-relevant="additions">
+      <div
+        className="fixed bottom-4 left-1/2 z-50 grid w-full max-w-sm -translate-x-1/2 gap-2 px-3"
+        aria-live="polite"
+        aria-relevant="additions"
+      >
         {toasts.map((t) => (
-          <div key={t.id} className={`toast toast_${t.kind}`}>
+          <div
+            key={t.id}
+            className={cn(
+              "rounded-md border bg-background/90 px-3 py-2 text-sm text-foreground shadow-lg backdrop-blur",
+              t.kind === "error" ? "border-destructive/40 bg-destructive/10" : "border-border"
+            )}
+          >
             {t.message}
           </div>
         ))}
@@ -38,4 +49,3 @@ export function useToast() {
   if (!ctx) throw new Error("useToast must be used within ToastProvider");
   return ctx;
 }
-

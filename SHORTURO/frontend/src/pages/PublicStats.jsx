@@ -2,6 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { getPublicStats } from "../lib/api.js";
 import { useToast } from "../components/ToastProvider.jsx";
+import { Badge } from "../components/ui/badge.jsx";
+import { Button } from "../components/ui/button.jsx";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card.jsx";
 
 function formatDate(input) {
   if (!input) return "—";
@@ -41,14 +44,12 @@ function TrendChart({ series }) {
     .join(" ");
 
   return (
-    <div className="chartWrap">
-      <svg viewBox={`0 0 ${w} ${h}`} className="chart" role="img" aria-label="Daily clicks trend chart">
-        <path d={`M ${padX} ${h - padY} H ${w - padX}`} className="chartAxis" />
-        <path d={d} className="chartLine" />
+    <div className="mt-3">
+      <svg viewBox={`0 0 ${w} ${h}`} className="w-full rounded-lg border bg-card/40" role="img" aria-label="Daily clicks">
+        <path d={`M ${padX} ${h - padY} H ${w - padX}`} stroke="hsl(var(--border))" strokeWidth="2" fill="none" />
+        <path d={d} stroke="hsl(var(--primary))" strokeWidth="3" fill="none" />
       </svg>
-      <div className="chartMeta">
-        <span className="muted">Max/day: {formatNumber(maxClicks)}</span>
-      </div>
+      <div className="mt-2 text-xs text-muted-foreground">Max/day: {formatNumber(maxClicks)}</div>
     </div>
   );
 }
@@ -99,82 +100,88 @@ export default function PublicStatsPage() {
   }
 
   return (
-    <div className="shell">
-      <header className="topbar">
-        <div className="brand">SHORTURO</div>
-        <div className="topActions">
-          <Link className="buttonSmall" to="/">
-            Home
-          </Link>
-        </div>
-      </header>
-
-      <main className="content">
-        <div className="stack">
-          <section className="card">
-            <div className="row">
-              <div>
-                <h1 className="title">Public stats</h1>
-                <p className="muted">Shareable click stats (no login required).</p>
-              </div>
-              {link?.shortUrl ? (
-                <div className="row">
-                  <a className="buttonSmall" href={link.shortUrl} target="_blank" rel="noreferrer">
+    <div className="min-h-screen bg-background">
+      <div className="container py-10">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight">Public stats</h1>
+            <p className="text-sm text-muted-foreground">Shareable click stats (no login required).</p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              asChild
+              variant="outline"
+              className="border-zinc-200 bg-zinc-50 text-zinc-900 hover:bg-zinc-100"
+            >
+              <Link to="/">Home</Link>
+            </Button>
+            {link?.shortUrl ? (
+              <>
+                <Button asChild variant="teal">
+                  <a href={link.shortUrl} target="_blank" rel="noreferrer">
                     Open
                   </a>
-                  <button className="buttonSmall" type="button" onClick={onCopy}>
-                    Copy
-                  </button>
-                </div>
-              ) : null}
-            </div>
-
-            {loading ? <div className="muted">Loading...</div> : null}
-            {error ? <div className="errorBox">{error}</div> : null}
-
-            {!loading && !error && link ? (
-              <div className="detailGrid">
-                <div className="detailItem">
-                  <div className="detailLabel">Short URL</div>
-                  <div className="detailValue">{link.shortUrl || link.slug}</div>
-                </div>
-                <div className="detailItem">
-                  <div className="detailLabel">Total clicks</div>
-                  <div className="detailValue">{formatNumber(link.clicks ?? 0)}</div>
-                </div>
-                <div className="detailItem">
-                  <div className="detailLabel">Last visited</div>
-                  <div className="detailValue">{formatDate(link.lastVisitedAt)}</div>
-                </div>
-              </div>
+                </Button>
+                <Button variant="secondary" className="bg-slate-900 text-white hover:bg-slate-800" onClick={onCopy}>
+                  Copy
+                </Button>
+              </>
             ) : null}
-          </section>
-
-          <section className="card">
-            <div className="row">
-              <h2 className="subtitle">Daily clicks</h2>
-              <div className="row">
-                <button
-                  className={`buttonSmall ${days === 7 ? "buttonSmallActive" : ""}`}
-                  type="button"
-                  onClick={() => setDays(7)}
-                >
-                  7d
-                </button>
-                <button
-                  className={`buttonSmall ${days === 30 ? "buttonSmallActive" : ""}`}
-                  type="button"
-                  onClick={() => setDays(30)}
-                >
-                  30d
-                </button>
-              </div>
-            </div>
-            {!loading && !error ? <TrendChart series={series} /> : null}
-          </section>
+          </div>
         </div>
-      </main>
+
+        <div className="mt-6 space-y-6">
+          {loading ? <div className="text-sm text-muted-foreground">Loading...</div> : null}
+          {error ? (
+            <div className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm">{error}</div>
+          ) : null}
+
+          {!loading && !error && link ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>Overview</CardTitle>
+                <CardDescription>{link.shortUrl || link.slug}</CardDescription>
+              </CardHeader>
+              <CardContent className="grid gap-3 md:grid-cols-3">
+                <div className="rounded-lg border bg-card/40 p-4">
+                  <div className="text-xs text-muted-foreground">Total clicks</div>
+                  <div className="mt-1 text-2xl font-semibold">{formatNumber(link.clicks ?? 0)}</div>
+                </div>
+                <div className="rounded-lg border bg-card/40 p-4">
+                  <div className="text-xs text-muted-foreground">Last visited</div>
+                  <div className="mt-1 text-sm font-medium">{formatDate(link.lastVisitedAt)}</div>
+                </div>
+                <div className="rounded-lg border bg-card/40 p-4">
+                  <div className="text-xs text-muted-foreground">Created</div>
+                  <div className="mt-1 text-sm font-medium">{formatDate(link.createdAt)}</div>
+                </div>
+              </CardContent>
+            </Card>
+          ) : null}
+
+          <Card>
+            <CardHeader className="flex-row items-center justify-between space-y-0">
+              <div>
+                <CardTitle>Daily clicks</CardTitle>
+                <CardDescription>{days} days</CardDescription>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <Button variant={days === 7 ? "default" : "outline"} size="sm" onClick={() => setDays(7)}>
+                  7d
+                </Button>
+                <Button variant={days === 30 ? "default" : "outline"} size="sm" onClick={() => setDays(30)}>
+                  30d
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>{!loading && !error ? <TrendChart series={series} /> : null}</CardContent>
+          </Card>
+
+          <div className="text-xs text-muted-foreground">
+            <Badge variant="outline">Privacy</Badge> This page does not show IP or user-agent details.
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
-

@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { BrowserMultiFormatReader } from "@zxing/browser";
-import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "../components/ToastProvider.jsx";
+import { Button } from "../components/ui/button.jsx";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card.jsx";
+import { Input } from "../components/ui/input.jsx";
+import { Label } from "../components/ui/label.jsx";
 
 function isLikelyUrl(text) {
   try {
@@ -14,13 +17,13 @@ function isLikelyUrl(text) {
 }
 
 export default function ScanPage() {
-  const navigate = useNavigate();
   const toast = useToast();
   const videoRef = useRef(null);
   const readerRef = useRef(null);
   const [running, setRunning] = useState(false);
   const [result, setResult] = useState("");
   const [error, setError] = useState(null);
+  const [manual, setManual] = useState("");
 
   useEffect(() => {
     const reader = new BrowserMultiFormatReader();
@@ -78,61 +81,67 @@ export default function ScanPage() {
     }
   }
 
-  function openResult() {
-    if (!result) return;
-    if (!isLikelyUrl(result)) {
-      toast.push("Scanned text is not a URL", { kind: "error" });
+  function openText(text) {
+    const t = (text || "").trim();
+    if (!t) return;
+    if (!isLikelyUrl(t)) {
+      toast.push("Not a valid URL", { kind: "error" });
       return;
     }
-    window.open(result, "_blank", "noreferrer");
+    window.open(t, "_blank", "noreferrer");
   }
 
   return (
-    <div className="shell">
-      <header className="topbar">
-        <div className="brand">SHORTURO</div>
-        <div className="topActions">
-          <button className="buttonSmall" type="button" onClick={() => navigate("/dashboard")}>
-            Back
-          </button>
-        </div>
-      </header>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-semibold tracking-tight">QR scanner</h1>
+        <p className="text-sm text-muted-foreground">Scan a QR code to open a short link instantly.</p>
+      </div>
 
-      <main className="content">
-        <div className="stack">
-          <section className="card">
-            <h1 className="title">QR scanner</h1>
-            <p className="muted">Point your camera at a QR code to open the link.</p>
+      <Card>
+        <CardHeader className="flex-row items-center justify-between space-y-0">
+          <div>
+            <CardTitle>Camera</CardTitle>
+            <CardDescription>Allow camera permissions when prompted.</CardDescription>
+          </div>
+          <Button variant="outline" onClick={restart} disabled={running}>
+            {running ? "Scanning..." : "Scan again"}
+          </Button>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {error ? <div className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm">{error}</div> : null}
 
-            {error ? <div className="errorBox">{error}</div> : null}
+          <div className="overflow-hidden rounded-lg border bg-card/40">
+            <video ref={videoRef} className="h-[320px] w-full object-cover" muted playsInline />
+          </div>
 
-            <div className="videoWrap">
-              <video ref={videoRef} className="video" muted playsInline />
-            </div>
-
-            <div className="row" style={{ marginTop: 12 }}>
-              <button className="buttonSmall" type="button" onClick={restart} disabled={running}>
-                {running ? "Scanning..." : "Scan again"}
-              </button>
-              <Link className="buttonSmall" to="/dashboard">
-                Dashboard
-              </Link>
-            </div>
-
-            {result ? (
-              <div className="resultBox">
-                <div className="detailLabel">Scanned</div>
-                <div className="resultText">{result}</div>
-                <div className="row" style={{ marginTop: 10 }}>
-                  <button className="buttonSmall" type="button" onClick={openResult}>
-                    Open
-                  </button>
-                </div>
+          {result ? (
+            <div className="rounded-lg border bg-card/40 p-3">
+              <div className="text-xs text-muted-foreground">Scanned</div>
+              <div className="mt-1 break-words text-sm font-medium">{result}</div>
+              <div className="mt-3">
+                <Button onClick={() => openText(result)}>Open</Button>
               </div>
-            ) : null}
-          </section>
-        </div>
-      </main>
+            </div>
+          ) : null}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Manual</CardTitle>
+          <CardDescription>Paste a URL to open it.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="grid gap-2">
+            <Label htmlFor="manual">URL</Label>
+            <Input id="manual" value={manual} onChange={(e) => setManual(e.target.value)} placeholder="https://..." />
+          </div>
+          <Button variant="outline" onClick={() => openText(manual)}>
+            Open
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -1,6 +1,11 @@
 const dotenv = require("dotenv");
+const path = require("path");
 
-dotenv.config();
+// Load env vars from .env. Support running the process from either:
+// - backend/ (normal: `npm run dev`)
+// - backend/src or other working dirs (e.g. some nodemon setups)
+dotenv.config({ path: path.resolve(process.cwd(), ".env") });
+dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
 function readEnv(name, fallback) {
   const value = process.env[name];
@@ -19,6 +24,23 @@ function normalizeBaseUrl(input) {
   return base || null;
 }
 
+function readBool(name, fallback) {
+  const raw = readEnv(name, null);
+  if (raw === null) return fallback;
+  const v = String(raw).trim().toLowerCase();
+  if (["1", "true", "yes", "y", "on"].includes(v)) return true;
+  if (["0", "false", "no", "n", "off"].includes(v)) return false;
+  return fallback;
+}
+
+function readCsvLower(name) {
+  const raw = readEnv(name, "");
+  return String(raw)
+    .split(",")
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean);
+}
+
 const env = {
   nodeEnv: readEnv("NODE_ENV", "development"),
   port: Number.parseInt(readEnv("PORT", "4000"), 10),
@@ -27,7 +49,13 @@ const env = {
 
   // required later 
   jwtSecret: readEnv("JWT_SECRET", null),
-  mongoUri: readEnv("MONGODB_URI", null)
+  mongoUri: readEnv("MONGODB_URI", null),
+  slugSecret: readEnv("SLUG_SECRET", readEnv("JWT_SECRET", null)),
+
+  // optional
+  geoLite2CityMmdbPath: readEnv("GEOLITE2_CITY_MMDB_PATH", null),
+  trustProxy: readBool("TRUST_PROXY", false),
+  adminEmails: readCsvLower("ADMIN_EMAILS")
 };
 
 function assertValidEnv() {

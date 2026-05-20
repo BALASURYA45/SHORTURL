@@ -5,13 +5,17 @@ const morgan = require("morgan");
 const { env } = require("./config/env");
 const { notFound, errorHandler } = require("./middleware/errors");
 const { authRequired } = require("./middleware/auth");
+const { adminRequired } = require("./middleware/admin");
 const authRoutes = require("./routes/auth");
 const linksRoutes = require("./routes/links");
 const redirectRoutes = require("./routes/redirect");
 const publicRoutes = require("./routes/public");
+const accountRoutes = require("./routes/account");
+const adminRoutes = require("./routes/admin");
 
 function createApp() {
   const app = express();
+  app.set("trust proxy", env.trustProxy);
 
   // Security + core middleware
   app.use(helmet());
@@ -34,6 +38,12 @@ function createApp() {
 
   // Links (protected)
   app.use("/api/links", authRequired, linksRoutes);
+
+  // Account (protected)
+  app.use("/api/account", authRequired, accountRoutes);
+
+  // Admin (protected)
+  app.use("/api/admin", authRequired, adminRequired, adminRoutes);
 
   // Public stats (no auth)
   app.use("/api/public", publicRoutes);

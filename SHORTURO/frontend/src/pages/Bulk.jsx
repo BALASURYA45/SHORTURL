@@ -1,8 +1,12 @@
 import { useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { bulkCreateLinks } from "../lib/api.js";
 import { useToast } from "../components/ToastProvider.jsx";
+import { Badge } from "../components/ui/badge.jsx";
+import { Button } from "../components/ui/button.jsx";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card.jsx";
+import { Label } from "../components/ui/label.jsx";
+import { Textarea } from "../components/ui/textarea.jsx";
 
 const rowSchema = z.object({
   originalUrl: z.string().url("Invalid URL (include https://)").max(2048),
@@ -96,7 +100,6 @@ function downloadText(filename, text) {
 }
 
 export default function BulkPage() {
-  const navigate = useNavigate();
   const toast = useToast();
   const [input, setInput] = useState("originalUrl,customSlug,expiresAt\nhttps://example.com,,\n");
   const [submitting, setSubmitting] = useState(false);
@@ -200,88 +203,83 @@ export default function BulkPage() {
   }
 
   return (
-    <div className="shell">
-      <header className="topbar">
-        <div className="brand">SHORTURO</div>
-        <div className="topActions">
-          <button className="buttonSmall" type="button" onClick={() => navigate("/dashboard")}>
-            Back
-          </button>
-        </div>
-      </header>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-semibold tracking-tight">Bulk shorten</h1>
+        <p className="text-sm text-muted-foreground">Upload or paste CSV to create many short links at once.</p>
+      </div>
 
-      <main className="content">
-        <div className="stack">
-          <section className="card">
-            <div className="row">
-              <div>
-                <h1 className="title">Bulk shorten (CSV)</h1>
-                <p className="muted">Upload a CSV with columns: originalUrl, customSlug, expiresAt (optional).</p>
-              </div>
-              <div className="row">
-                <label className="buttonSmall" style={{ display: "inline-block" }}>
-                  Upload CSV
-                  <input type="file" accept=".csv,text/csv" onChange={onUploadFile} style={{ display: "none" }} />
-                </label>
-                <Link className="buttonSmall" to="/dashboard">
-                  Dashboard
-                </Link>
-              </div>
+      <Card>
+        <CardHeader className="flex-row items-center justify-between space-y-0">
+          <div>
+            <CardTitle>CSV input</CardTitle>
+            <CardDescription>Columns: originalUrl, customSlug, expiresAt (optional).</CardDescription>
+          </div>
+          <label>
+            <Button asChild variant="outline">
+              <span>Upload CSV</span>
+            </Button>
+            <input type="file" accept=".csv,text/csv" onChange={onUploadFile} className="hidden" />
+          </label>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={onSubmit} className="grid gap-4">
+            <div className="grid gap-2">
+              <Label>CSV</Label>
+              <Textarea value={input} onChange={(e) => setInput(e.target.value)} rows={10} className="font-mono text-xs" />
             </div>
 
-            <form onSubmit={onSubmit}>
-              <label className="label">
-                CSV input
-                <textarea className="textarea" value={input} onChange={(e) => setInput(e.target.value)} rows={10} />
-              </label>
-
-              {parsed.errors.length ? (
-                <div className="errorBox">
-                  {parsed.errors.slice(0, 6).map((e) => (
-                    <div key={e}>{e}</div>
-                  ))}
-                  {parsed.errors.length > 6 ? <div>…and {parsed.errors.length - 6} more</div> : null}
-                </div>
-              ) : (
-                <div className="infoBox">
-                  Ready: {parsed.items.length} item(s) will be created (max 200 per request).
-                </div>
-              )}
-
-              <button className="button" type="submit" disabled={submitting || parsed.errors.length > 0}>
-                {submitting ? "Creating..." : "Create links"}
-              </button>
-            </form>
-          </section>
-
-          {Array.isArray(results) ? (
-            <section className="card">
-              <div className="row">
-                <h2 className="subtitle">Results</h2>
-                <button className="buttonSmall" type="button" onClick={downloadResults}>
-                  Download CSV
-                </button>
+            {parsed.errors.length ? (
+              <div className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm">
+                {parsed.errors.slice(0, 6).map((e) => (
+                  <div key={e}>{e}</div>
+                ))}
+                {parsed.errors.length > 6 ? <div>…and {parsed.errors.length - 6} more</div> : null}
               </div>
-              <div className="table">
-                {results.slice(0, 50).map((r) => (
-                  <div key={`${r.index}_${r.ok}`} className="tableRow tableRowTwo">
-                    <div className="cell">
-                      <div className="cellTitle">
-                        #{r.index + 1} {r.ok ? "OK" : "ERROR"}
-                      </div>
-                      <div className="cellSub">{r.ok ? r.link?.shortUrl || r.link?.slug : r.error}</div>
+            ) : (
+              <div className="rounded-lg border bg-card/40 px-3 py-2 text-sm">
+                Ready: <span className="font-semibold">{parsed.items.length}</span> item(s) (max 200).
+              </div>
+            )}
+
+            <Button type="submit" disabled={submitting || parsed.errors.length > 0}>
+              {submitting ? "Creating..." : "Create links"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+
+      {Array.isArray(results) ? (
+        <Card>
+          <CardHeader className="flex-row items-center justify-between space-y-0">
+            <div>
+              <CardTitle>Results</CardTitle>
+              <CardDescription>{results.length} row(s)</CardDescription>
+            </div>
+            <Button variant="outline" onClick={downloadResults}>
+              Download CSV
+            </Button>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-2">
+              {results.slice(0, 50).map((r) => (
+                <div key={`${r.index}_${r.ok}`} className="flex items-center justify-between gap-3 rounded-lg border bg-card/40 p-3">
+                  <div className="min-w-0">
+                    <div className="text-sm font-semibold">
+                      #{r.index + 1} {r.ok ? "OK" : "ERROR"}
                     </div>
-                    <div className="cellMeta">
-                      <div className="chip">{r.ok ? "created" : "failed"}</div>
+                    <div className="mt-1 truncate text-xs text-muted-foreground">
+                      {r.ok ? r.link?.shortUrl || r.link?.slug : r.error}
                     </div>
                   </div>
-                ))}
-              </div>
-              {results.length > 50 ? <div className="muted">Showing first 50 results…</div> : null}
-            </section>
-          ) : null}
-        </div>
-      </main>
+                  <Badge variant={r.ok ? "secondary" : "destructive"}>{r.ok ? "created" : "failed"}</Badge>
+                </div>
+              ))}
+            </div>
+            {results.length > 50 ? <div className="mt-3 text-sm text-muted-foreground">Showing first 50…</div> : null}
+          </CardContent>
+        </Card>
+      ) : null}
     </div>
   );
 }
