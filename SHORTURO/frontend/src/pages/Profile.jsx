@@ -13,12 +13,11 @@ import {
   QrCode,
   RotateCw,
   Share2,
-  ShieldCheck,
   Sparkles,
   Trash2,
   UserCircle2
 } from "lucide-react";
-import { getTokenPayload, getTokenSubject, logout } from "../lib/auth.js";
+import { getTokenPayload, logout } from "../lib/auth.js";
 import { adminListUsers, adminUpdateUserPlan, deleteLink, getLinkQr, getMe, listLinks, regenerateLinkSlug, updateLink } from "../lib/api.js";
 import { useToast } from "../components/ToastProvider.jsx";
 import { Badge } from "../components/ui/badge.jsx";
@@ -108,22 +107,11 @@ function downloadTextAsFile({ filename, text, mime = "text/plain;charset=utf-8" 
   window.setTimeout(() => URL.revokeObjectURL(url), 0);
 }
 
-function formatDateTimeFromUnixSeconds(sec) {
-  const n = Number(sec);
-  if (!Number.isFinite(n)) return "—";
-  const dt = new Date(n * 1000);
-  if (Number.isNaN(dt.getTime())) return "—";
-  return dt.toLocaleString();
-}
-
 export default function ProfilePage() {
   const toast = useToast();
   const payload = useMemo(() => getTokenPayload(), []);
-  const userId = useMemo(() => getTokenSubject(), []);
 
   const email = payload?.email ? String(payload.email) : "—";
-  const issuedAt = payload?.iat ? formatDateTimeFromUnixSeconds(payload.iat) : "—";
-  const expiresAt = payload?.exp ? formatDateTimeFromUnixSeconds(payload.exp) : "—";
 
   const [loggingOut, setLoggingOut] = useState(false);
   const [loadingLinks, setLoadingLinks] = useState(true);
@@ -469,8 +457,8 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <Card className="lg:col-span-2 rounded-2xl border-muted/60 bg-card/60 backdrop-blur">
+      <div className="grid gap-6">
+        <Card className="rounded-2xl border-muted/60 bg-card/60 backdrop-blur">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <UserCircle2 className="h-5 w-5 text-primary" />
@@ -479,7 +467,7 @@ export default function ProfilePage() {
             <CardDescription>Your identity and session info.</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4">
               <div className="rounded-2xl border bg-gradient-to-b from-background to-background/40 p-4 shadow-sm">
                 <div className="text-xs text-muted-foreground">Email</div>
                 <div className="mt-1 flex items-center justify-between gap-3">
@@ -489,51 +477,6 @@ export default function ProfilePage() {
                   </Button>
                 </div>
               </div>
-
-              <div className="rounded-2xl border bg-gradient-to-b from-background to-background/40 p-4 shadow-sm">
-                <div className="text-xs text-muted-foreground">User ID</div>
-                <div className="mt-1 flex items-center justify-between gap-3">
-                  <div className="min-w-0 truncate font-medium">{userId || "—"}</div>
-                  <Button variant="outline" size="icon" onClick={() => onCopy(userId || "")} aria-label="Copy user id">
-                    <Copy className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-
-              <div className="rounded-2xl border bg-gradient-to-b from-background to-background/40 p-4 shadow-sm">
-                <div className="text-xs text-muted-foreground">Issued</div>
-                <div className="mt-1 font-medium">{issuedAt}</div>
-              </div>
-
-              <div className="rounded-2xl border bg-gradient-to-b from-background to-background/40 p-4 shadow-sm">
-                <div className="text-xs text-muted-foreground">Expires</div>
-                <div className="mt-1 flex items-center justify-between gap-3">
-                  <div className="min-w-0 truncate font-medium">{expiresAt}</div>
-                  {payload?.exp ? <Badge variant="outline">JWT</Badge> : <Badge variant="secondary">Unknown</Badge>}
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="rounded-2xl border-muted/60 bg-card/60 backdrop-blur">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <ShieldCheck className="h-5 w-5 text-emerald-600" />
-              Security
-            </CardTitle>
-            <CardDescription>Session & best practices.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3 text-sm text-muted-foreground">
-            <div className="rounded-2xl border bg-gradient-to-b from-background to-background/40 p-4 shadow-sm">
-              <div className="font-medium text-foreground">JWT session</div>
-              <div className="mt-1">
-                You are signed in using a JWT stored in localStorage. Logging out clears it from this browser.
-              </div>
-            </div>
-            <div className="rounded-2xl border bg-gradient-to-b from-background to-background/40 p-4 shadow-sm">
-              <div className="font-medium text-foreground">Tip</div>
-              <div className="mt-1">Use a password manager and avoid signing in on shared devices.</div>
             </div>
           </CardContent>
         </Card>

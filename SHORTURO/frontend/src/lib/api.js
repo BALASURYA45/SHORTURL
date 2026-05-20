@@ -114,6 +114,10 @@ export function login({ email, password }) {
   return apiFetch("/api/auth/login", { method: "POST", body: { email, password } });
 }
 
+export function loginWithGoogle({ credential }) {
+  return apiFetch("/api/auth/google", { method: "POST", body: { credential } });
+}
+
 export function createLink({ originalUrl, customSlug, expiresAt }) {
   return apiFetch("/api/links", { method: "POST", body: { originalUrl, customSlug, expiresAt } });
 }

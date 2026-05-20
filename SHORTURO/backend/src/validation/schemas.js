@@ -1,6 +1,12 @@
 const { z } = require("zod");
 
-const emailSchema = z.string().email().min(3).max(320);
+const emailSchema = z
+  .string()
+  .trim()
+  .min(3, "Email is required")
+  .max(320, "Email is too long")
+  .email("Enter a valid email")
+  .transform((value) => value.toLowerCase());
 const passwordSchema = z
   .string()
   .min(8, "Password must be at least 8 characters")
@@ -18,6 +24,10 @@ const signupSchema = z.object({
 const loginSchema = z.object({
   email: emailSchema,
   password: z.string().min(1).max(200)
+});
+
+const googleAuthSchema = z.object({
+  credential: z.string().min(1, "Missing Google credential")
 });
 
 const slugSchema = z
@@ -57,4 +67,4 @@ const bulkCreateLinksSchema = z.object({
     .max(200)
 });
 
-module.exports = { signupSchema, loginSchema, createLinkSchema, updateLinkSchema, bulkCreateLinksSchema };
+module.exports = { signupSchema, loginSchema, googleAuthSchema, createLinkSchema, updateLinkSchema, bulkCreateLinksSchema };

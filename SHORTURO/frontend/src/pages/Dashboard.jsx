@@ -754,9 +754,6 @@ export default function DashboardPage() {
                   <Link2 className="h-4 w-4 -rotate-[36deg] text-primary" />
                 </span>
                 Create short link
-                <Badge variant="secondary" className="ml-2 bg-primary/10 text-primary">
-                  Pro composer
-                </Badge>
               </CardTitle>
               <CardDescription>Alias, expiry, and UTM builder with a live preview.</CardDescription>
             </div>

@@ -61,10 +61,12 @@ const env = {
 
   // URL safety checks
   urlSafetyMode: readEnv("URL_SAFETY_MODE", "heuristic"),
-  safeBrowsingApiKey: readEnv("SAFE_BROWSING_API_KEY", "")
-  ,
+  safeBrowsingApiKey: readEnv("SAFE_BROWSING_API_KEY", ""),
   openaiApiKey: readEnv("OPENAI_API_KEY", ""),
-  openaiModel: readEnv("OPENAI_MODEL", "gpt-4o-mini")
+  openaiModel: readEnv("OPENAI_MODEL", "gpt-4o-mini"),
+
+  // Google auth
+  googleClientId: readEnv("GOOGLE_CLIENT_ID", "")
 };
 
 env.frontendOrigins = readCsvLower("FRONTEND_ORIGIN");

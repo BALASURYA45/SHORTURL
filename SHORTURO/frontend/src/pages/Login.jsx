@@ -1,17 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
-import { login } from "../lib/api.js";
+import { login, loginWithGoogle } from "../lib/api.js";
 import { setToken } from "../lib/auth.js";
 import { useToast } from "../components/ToastProvider.jsx";
 import AuthLayout from "../components/AuthLayout.jsx";
+import GoogleSignInButton from "../components/GoogleSignInButton.jsx";
 import { Button } from "../components/ui/button.jsx";
 import { Input } from "../components/ui/input.jsx";
 import { Label } from "../components/ui/label.jsx";
 import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 
 const schema = z.object({
-  email: z.string().email("Enter a valid email"),
+  email: z.string().trim().email("Enter a valid email").transform((value) => value.toLowerCase()),
   password: z.string().min(1, "Password is required")
 });
 
@@ -28,6 +29,22 @@ export default function LoginPage() {
 
   const canSubmit = useMemo(() => email.trim() && password, [email, password]);
 
+  async function onGoogleCredential(credential) {
+    setFormError(null);
+    setFieldErrors({});
+    setSubmitting(true);
+    try {
+      const data = await loginWithGoogle({ credential });
+      setToken(data?.token);
+      toast.push("Logged in with Google");
+      navigate("/dashboard", { replace: true });
+    } catch (err) {
+      setFormError(err?.message || "Google sign-in failed");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   async function onSubmit(e) {
     e.preventDefault();
     setFormError(null);
@@ -43,6 +60,7 @@ export default function LoginPage() {
 
     setSubmitting(true);
     try {
+      setEmail(parsed.data.email);
       const data = await login(parsed.data);
       setToken(data?.token);
       try {
@@ -81,7 +99,16 @@ export default function LoginPage() {
         </div>
       ) : null}
 
-      <form className="grid gap-4" onSubmit={onSubmit}>
+      <div className="grid gap-4">
+        <GoogleSignInButton onCredential={onGoogleCredential} disabled={submitting} />
+        <div className="flex items-center gap-3 text-xs uppercase tracking-wide text-muted-foreground">
+          <div className="h-px flex-1 bg-border" />
+          <span>or continue with email</span>
+          <div className="h-px flex-1 bg-border" />
+        </div>
+      </div>
+
+      <form className="mt-4 grid gap-4" onSubmit={onSubmit}>
         <div className="grid gap-2">
           <Label htmlFor="email" className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
             Email
@@ -134,9 +161,9 @@ export default function LoginPage() {
         </Button>
 
         <div className="text-sm text-muted-foreground">
-          New here?{" "}
+          No account yet?{" "}
           <Link className="text-foreground underline-offset-4 hover:underline" to="/signup">
-            Create an account
+            Continue with email signup
           </Link>
         </div>
       </form>
