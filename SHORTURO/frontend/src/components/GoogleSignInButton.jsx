@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 
-const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
+const GOOGLE_CLIENT_ID =
+  (typeof __GOOGLE_CLIENT_ID__ !== "undefined" && __GOOGLE_CLIENT_ID__) ||
+  import.meta.env.VITE_GOOGLE_CLIENT_ID ||
+  "";
 const GOOGLE_SCRIPT_SRC = "https://accounts.google.com/gsi/client";
 
 function loadGoogleScript() {
@@ -34,7 +37,7 @@ export default function GoogleSignInButton({ onCredential, disabled = false }) {
 
     async function setup() {
       if (!GOOGLE_CLIENT_ID) {
-        setError("Google sign-in is not configured.");
+        setError("Google sign-in is not configured. Add VITE_GOOGLE_CLIENT_ID to frontend/.env and restart Vite.");
         return;
       }
 
