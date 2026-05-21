@@ -653,7 +653,7 @@ export default function ProfilePage() {
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <a
-                        className="truncate font-semibold underline-offset-4 hover:underline"
+                        className="basis-full max-w-full break-all font-semibold leading-snug underline-offset-4 hover:underline md:basis-auto md:truncate md:break-normal"
                         href={l.shortUrl || "#"}
                         target="_blank"
                         rel="noreferrer"
@@ -665,7 +665,9 @@ export default function ProfilePage() {
                       {l.expiresAt ? <Badge variant="outline">Expires</Badge> : null}
                       <Badge variant="secondary">{l.clicks ?? 0} clicks</Badge>
                     </div>
-                    <div className="mt-1 truncate text-sm text-muted-foreground">{l.originalUrl}</div>
+                    <div className="mt-1 max-w-full break-all text-sm leading-snug text-muted-foreground md:truncate md:break-normal">
+                      {l.originalUrl}
+                    </div>
                   </div>
 
                   <div className="flex items-start justify-end">
