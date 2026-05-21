@@ -30,21 +30,28 @@ function parseExpiresAt(expiresAt) {
   return dt;
 }
 
-function makeSlugSalt() {
-  // base64url so it's safe to store and use in HMAC input
-  return crypto.randomBytes(9).toString("base64url");
-}
-
-function hmacSlugFromInput(input, length = 10) {
+function sha256SlugFromInput(input, length = 10) {
   const alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  const digest = crypto.createHmac("sha256", env.slugSecret || env.jwtSecret).update(String(input)).digest();
+  const digest = crypto.createHash("sha256").update(String(input)).digest();
   let out = "";
   for (let i = 0; i < length; i += 1) out += alphabet[digest[i] % alphabet.length];
   return out;
 }
 
-function slugForLinkIdAndSalt(linkIdHex, slugSalt, length = 10) {
-  return hmacSlugFromInput(`${linkIdHex}:${slugSalt}`, length);
+function parseSlugNonce(slugSalt) {
+  const n = Number.parseInt(String(slugSalt ?? "0"), 10);
+  if (Number.isNaN(n) || n < 0) return 0;
+  return n;
+}
+
+function slugForUrlAndNonce({ userId, originalUrl, nonce, length = 10 }) {
+  // Deterministic for (userId, originalUrl, nonce). Nonce allows collision handling and regeneration.
+  // Include a secret so slugs aren't trivially computed offline.
+  const secret = env.slugSecret || env.jwtSecret || "";
+  const url = String(originalUrl || "").trim();
+  const uid = String(userId || "").trim();
+  const n = Number.isFinite(nonce) && nonce >= 0 ? nonce : 0;
+  return sha256SlugFromInput(`${secret}:${uid}:${url}:${n}`, length);
 }
 
 async function createLinkWithUniqueSlug({ userId, originalUrl, customSlug, expiresAt }) {
@@ -63,8 +70,8 @@ async function createLinkWithUniqueSlug({ userId, originalUrl, customSlug, expir
   for (let attempt = 0; attempt < 6; attempt += 1) {
     try {
       const _id = new mongoose.Types.ObjectId();
-      const slugSalt = makeSlugSalt();
-      const slug = slugForLinkIdAndSalt(_id.toHexString(), slugSalt, 10);
+      const nonce = attempt;
+      const slug = slugForUrlAndNonce({ userId, originalUrl, nonce, length: 10 });
       // eslint-disable-next-line no-await-in-loop
       return await Link.create({
         _id,
@@ -72,7 +79,7 @@ async function createLinkWithUniqueSlug({ userId, originalUrl, customSlug, expir
         originalUrl,
         slug,
         slugType: "generated",
-        slugSalt,
+        slugSalt: String(nonce),
         expiresAt: expiresAtValue ?? null
       });
     } catch (err) {
@@ -865,12 +872,13 @@ router.post("/:id/regenerate-slug", async (req, res, next) => {
     // This will change the short URL and the previous short URL will stop working.
     for (let attempt = 0; attempt < 6; attempt += 1) {
       try {
-        const slugSalt = makeSlugSalt();
-        const slug = slugForLinkIdAndSalt(String(link._id), slugSalt, 10);
+        const currentNonce = parseSlugNonce(link.slugSalt);
+        const nonce = currentNonce + 1 + attempt;
+        const slug = slugForUrlAndNonce({ userId, originalUrl: link.originalUrl, nonce, length: 10 });
         // eslint-disable-next-line no-await-in-loop
         const updated = await Link.findOneAndUpdate(
           { _id: id, userId },
-          { $set: { slug, slugSalt, slugType: "generated" } },
+          { $set: { slug, slugSalt: String(nonce), slugType: "generated" } },
           { new: true }
         ).lean();
         return res.json({ link: toLinkResponse(updated) });
